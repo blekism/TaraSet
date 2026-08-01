@@ -1,5 +1,11 @@
+"use client";
+
 import { Button } from "@/components/button";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { createUserClient } from "@/lib/client";
 
 const STEPS = [
   {
@@ -20,19 +26,36 @@ const STEPS = [
 ];
 
 export default function Home() {
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+  const supabase = createUserClient();
+
+  async function signIn() {
+    setBusy(true);
+    const result = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (result.error) {
+      setBusy(false);
+      toast.error("Could not sign in. Please try again.");
+      return;
+    }
+    if (result.data) return;
+    router.replace("/circles");
+  }
+
   return (
     <div className="min-h-screen bg-background dot-grid">
       <header className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5">
         <div className="flex items-center gap-2.5">
           <span className="size-2.5 rounded-full bg-lime" />
           <span className="font-display text-lg font-bold tracking-tight">
-            whenfree
+            TaraSet!
           </span>
         </div>
-
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/auth">Sign in</Link>
-        </Button>
       </header>
 
       <main className="mx-auto max-w-5xl px-5">
@@ -52,7 +75,13 @@ export default function Home() {
           </p>
           <div className="mt-10">
             <Button asChild size="lg">
-              <Link href={"/auth"}>{"Continue with Google"}</Link>
+              <button
+                onClick={() => {
+                  signIn();
+                }}
+              >
+                Continue with Google
+              </button>
             </Button>
           </div>
         </section>
@@ -68,7 +97,7 @@ export default function Home() {
         </section>
 
         <footer className="py-16 text-center text-xs text-muted-foreground">
-          whenfree
+          TaraSet!
         </footer>
       </main>
     </div>
