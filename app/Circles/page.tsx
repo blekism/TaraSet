@@ -10,7 +10,7 @@ import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
 
-function CirclesPage() {
+export default function CirclesPage() {
 
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
