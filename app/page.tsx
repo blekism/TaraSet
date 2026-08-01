@@ -44,7 +44,7 @@ export default function Home() {
       return;
     }
     if (result.data) return;
-    router.replace("/circles");
+    router.replace("/Circles");
   }
 
   return (
