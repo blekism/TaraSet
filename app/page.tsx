@@ -35,7 +35,7 @@ export default function Home() {
     const result = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/Circles`,
       },
     });
     if (result.error) {
@@ -43,7 +43,6 @@ export default function Home() {
       toast.error("Could not sign in. Please try again.");
       return;
     }
-    if (result.data) return;
     router.replace("/Circles");
   }
 
