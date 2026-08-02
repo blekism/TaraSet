@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { ArrowRight, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
-
-import { AppShell } from "@/components/appShell";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
