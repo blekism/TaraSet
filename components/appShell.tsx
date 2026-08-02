@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 import type { ReactNode } from "react";
@@ -30,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link href="/circles" className="flex items-center gap-2.5">
             <span className="size-2.5 rounded-full bg-lime" />
             <span className="font-display text-lg font-bold tracking-tight">
-              whenfree
+              TaraSet!
             </span>
           </Link>
           <div className="flex items-center gap-3">

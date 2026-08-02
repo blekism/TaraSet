@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -11,12 +10,11 @@ import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
 
 export default function CirclesPage() {
-
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
 
   return (
-    <AppShell>
+    <>
       <h1 className="text-4xl font-bold">Your circles</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         A circle is a group of friends trying to find a date that works.
@@ -108,6 +106,6 @@ export default function CirclesPage() {
           </p>
         )} */}
       </div>
-    </AppShell>
+    </>
   );
 }
