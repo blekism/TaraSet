@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ArrowRight, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
 
-import { AppShell } from "@/components/appShell";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 // import { supabase } from "@/integrations/supabase/client";
@@ -55,7 +54,7 @@ function CirclesPage() {
   //   });
 
   return (
-    <AppShell>
+    <>
       <h1 className="text-4xl font-bold">Your circles</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         A circle is a group of friends trying to find a date that works.
@@ -147,6 +146,6 @@ function CirclesPage() {
           </p>
         )} */}
       </div>
-    </AppShell>
+    </>
   );
 }
