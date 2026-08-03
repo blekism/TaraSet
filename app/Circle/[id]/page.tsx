@@ -3,54 +3,54 @@ import { ArrowRight, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
-// import { supabase } from "@/integrations/supabase/client";
-// import { fetchMyCircles, makeCode } from "@/lib/queries";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchMyCircles, makeCode } from "@/lib/queries";
 
 function CirclesPage() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
 
-  //   const circles = useQuery({ queryKey: ["circles"], queryFn: fetchMyCircles });
+    const circles = useQuery({ queryKey: ["circles"], queryFn: fetchMyCircles });
 
-  //   const create = useMutation({
-  //     mutationFn: async (circleName: string) => {
-  //       const { data: userData } = await supabase.auth.getUser();
-  //       const uid = userData.user?.id;
-  //       if (!uid) throw new Error("Not signed in");
-  //       const { data, error } = await supabase
-  //         .from("circles")
-  //         .insert({ name: circleName, code: makeCode(), created_by: uid })
-  //         .select()
-  //         .single();
-  //       if (error) throw error;
-  //       const { error: mErr } = await supabase
-  //         .from("circle_members")
-  //         .insert({ circle_id: data.id, user_id: uid });
-  //       if (mErr) throw mErr;
-  //       return data;
-  //     },
-  //     onSuccess: (data) => {
-  //       setName("");
-  //       toast.success(`Circle created — code ${data.code}`);
-  //       queryClient.invalidateQueries({ queryKey: ["circles"] });
-  //     },
-  //     onError: (e: Error) => toast.error(e.message),
-  //   });
+    const create = useMutation({
+      mutationFn: async (circleName: string) => {
+        const { data: userData } = await supabase.auth.getUser();
+        const uid = userData.user?.id;
+        if (!uid) throw new Error("Not signed in");
+        const { data, error } = await supabase
+          .from("circles")
+          .insert({ name: circleName, code: makeCode(), created_by: uid })
+          .select()
+          .single();
+        if (error) throw error;
+        const { error: mErr } = await supabase
+          .from("circle_members")
+          .insert({ circle_id: data.id, user_id: uid });
+        if (mErr) throw mErr;
+        return data;
+      },
+      onSuccess: (data) => {
+        setName("");
+        toast.success(`Circle created — code ${data.code}`);
+        queryClient.invalidateQueries({ queryKey: ["circles"] });
+      },
+      onError: (e: Error) => toast.error(e.message),
+    });
 
-  //   const join = useMutation({
-  //     mutationFn: async (joinCode: string) => {
-  //       const { error } = await supabase.rpc("join_circle_by_code", {
-  //         _code: joinCode,
-  //       });
-  //       if (error) throw error;
-  //     },
-  //     onSuccess: () => {
-  //       setCode("");
-  //       toast.success("Joined the circle");
-  //       queryClient.invalidateQueries({ queryKey: ["circles"] });
-  //     },
-  //     onError: (e: Error) => toast.error(e.message),
-  //   });
+    const join = useMutation({
+      mutationFn: async (joinCode: string) => {
+        const { error } = await supabase.rpc("join_circle_by_code", {
+          _code: joinCode,
+        });
+        if (error) throw error;
+      },
+      onSuccess: () => {
+        setCode("");
+        toast.success("Joined the circle");
+        queryClient.invalidateQueries({ queryKey: ["circles"] });
+      },
+      onError: (e: Error) => toast.error(e.message),
+    });
 
   return (
     <>
@@ -62,24 +62,24 @@ function CirclesPage() {
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <form
           className="rounded-xl border border-border bg-surface p-5"
-          //   onSubmit={(e) => {
-          //     e.preventDefault();
-          //     if (name.trim()) create.mutate(name.trim());
-          //   }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (name.trim()) create.mutate(name.trim());
+            }}
         >
           <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
             Start a circle
           </h2>
           <Input
             value={name}
-            // onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             placeholder="Weekend crew"
             maxLength={60}
             className="mt-3 bg-background"
           />
           <Button
             type="submit"
-            // disabled={!name.trim() || create.isPending}
+            disabled={!name.trim() || create.isPending}
             className="mt-3 w-full"
           >
             <Plus className="size-4" /> Create
@@ -90,7 +90,7 @@ function CirclesPage() {
           className="rounded-xl border border-border bg-surface p-5"
           onSubmit={(e) => {
             e.preventDefault();
-            // if (code.trim()) join.mutate(code.trim());
+            if (code.trim()) join.mutate(code.trim());
           }}
         >
           <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
@@ -98,7 +98,7 @@ function CirclesPage() {
           </h2>
           <Input
             value={code}
-            // onChange={(e) => setCode(e.target.value.toUpperCase())}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
             placeholder="A7K2QX"
             maxLength={6}
             className="mt-3 bg-background font-mono tracking-[0.35em]"
@@ -106,7 +106,7 @@ function CirclesPage() {
           <Button
             type="submit"
             variant="secondary"
-            // disabled={!code.trim() || join.isPending}
+            disabled={!code.trim() || join.isPending}
             className="mt-3 w-full"
           >
             Join circle
@@ -115,7 +115,7 @@ function CirclesPage() {
       </div>
 
       <div className="mt-10 space-y-3">
-        {/* {circles.isLoading ? (
+        {circles.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : circles.data?.length ? (
           circles.data.map((c) => (
@@ -143,7 +143,7 @@ function CirclesPage() {
           <p className="rounded-xl border border-dashed border-border px-5 py-10 text-center text-sm text-muted-foreground">
             No circles yet. Create one above and share the code.
           </p>
-        )} */}
+        )}
       </div>
     </>
   );
