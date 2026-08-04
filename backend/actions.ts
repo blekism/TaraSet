@@ -34,7 +34,7 @@ export async function CreateCircle(_previousState: any, formdata: FormData) {
     }
     console.log("data is: ", data);
     return {
-        code: 0,
+        code: 1,
         message: "Circle Created Successfully.",
         data: data,
     };
@@ -58,4 +58,68 @@ export async function Login(_previousState: any) {
       message: "An error has occured, please try again later.",
     };
   }
+}
+
+export async function ValidateCode(code: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("cicle_members_tbl")
+    .select("*")
+    .eq("circle_code", code)
+    .maybeSingle();
+
+    if (error) {
+      console.log(error);
+      return {
+        code: 0,
+        message: "An error has occurred. Please try again later",
+      };
+    }
+    console.log("data is: ", data);
+    return {
+        code: 1,
+        message: "Circle Validated!",
+        data: data,
+    };
+}
+
+export async function JoinCircle(_previousState: any, formdata: FormData) {
+  const supabase = await createClient();
+
+
+
+  const code = formdata.get("circle_code") as string;
+
+  const result = await ValidateCode(code);
+
+  if (result.code === 0) {
+    return {
+      code: 0,
+      message: "Circle does not exist!"
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("cicle_members_tbl")
+    .insert({
+      circle_id: result.data.circle_id,
+      user_id: await supabase.auth.getSession(),
+    })
+    .select()
+    .single();
+
+    if (error) {
+      console.log(error);
+      return {
+        code: 0,
+        message: "An error has occurred. Please try again later",
+      };
+    }
+    console.log("data is: ", data);
+    return {
+        code: 0,
+        message: "Circle Created Successfully.",
+        data: data,
+    };
 }
