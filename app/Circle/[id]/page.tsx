@@ -6,7 +6,7 @@ import { eachDayOfInterval, parseISO } from "date-fns";
 import { ArrowLeft, Check, Copy, Sparkles, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { AppShell } from "@/components/AppShell";
+// import { AppShell } from "@/components/AppShell";
 import { PlanPanel } from "@/components/PlanPanel";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_authenticated/circles/$circleId")({
   component: CircleDetail,
 });
 
-function CircleDetail() {
+export default function CircleDetail() {
   const { circleId } = Route.useParams();
   const { user } = useSession();
   const queryClient = useQueryClient();
@@ -125,7 +125,7 @@ function CircleDetail() {
   const groupDays = daysOf(availabilities.filter((a) => a.user_id !== user?.id));
 
   return (
-    <AppShell>
+    <>
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_23rem]">
         {/* ── Left column: planning content ── */}
         <div className="min-w-0 space-y-6">
@@ -400,6 +400,6 @@ function CircleDetail() {
           />
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }
