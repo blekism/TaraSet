@@ -5,14 +5,17 @@ import {
   ArrowLeft,
   CalendarDays,
   ChevronDown,
+  Clock,
   MapPin,
+  Pencil,
   Plus,
   Trash2,
   UtensilsCrossed,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { ACTIVITIES, activityMeta } from "@/components/PlanPanel";
+import { AppShell } from "@/components/AppShell";
+import { activityMeta } from "@/components/PlanPanel";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,9 +29,30 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { formatWindow } from "@/lib/availability";
-// import { fetchCircleDetail } from "@/lib/queries";
-// import { useSession } from "@/hooks/useSession";
+import { fetchCircleDetail } from "@/lib/queries";
+import { useSession } from "@/hooks/useSession";
 import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/_authenticated/circles/$circleId_/itinerary")({
+  head: () => ({
+    meta: [
+      { title: "Itinerary · whenfree" },
+      {
+        name: "description",
+        content:
+          "Build the itinerary for your circle — destinations, activities, food and locations in one place.",
+      },
+      { property: "og:title", content: "Itinerary · whenfree" },
+      {
+        property: "og:description",
+        content: "Destinations and activities for your circle's next trip.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: ItineraryPage,
+});
 
 function ItineraryPage() {
   const { circleId } = Route.useParams();
@@ -37,14 +61,16 @@ function ItineraryPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const [activity, setActivity] = useState("food");
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [food, setFood] = useState("");
   const [note, setNote] = useState("");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
   const detail = useQuery({
     queryKey: ["circle", circleId],
@@ -76,32 +102,65 @@ function ItineraryPage() {
 
   const selected = destinations.find((d) => d.id === selectedId);
 
+  const resetForm = () => {
+    setEditingId(null);
+    setTitle("");
+    setLocation("");
+    setFood("");
+    setNote("");
+    setStart("");
+    setEnd("");
+    setStartTime("");
+    setEndTime("");
+  };
+
+  const openAdd = () => {
+    resetForm();
+    setOpen(true);
+  };
+
+  const openEdit = (d: (typeof destinations)[number]) => {
+    setEditingId(d.id);
+    setTitle(d.title ?? "");
+    setLocation(d.location ?? "");
+    setFood(d.food ?? "");
+    setNote(d.note ?? "");
+    setStart(d.start_date);
+    setEnd(d.end_date);
+    setStartTime(d.start_time ? d.start_time.slice(0, 5) : "");
+    setEndTime(d.end_time ? d.end_time.slice(0, 5) : "");
+    setOpen(true);
+  };
+
   const save = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("Not signed in");
       if (!start) throw new Error("Pick a start date");
-      const { error } = await supabase.from("plans").insert({
-        circle_id: circleId,
-        user_id: user.id,
+      const payload = {
         start_date: start,
         end_date: end || start,
-        activity,
+        start_time: startTime || null,
+        end_time: endTime || null,
         title: title.trim() || null,
         location: location.trim() || null,
         food: food.trim() || null,
         note: note.trim() || null,
-      });
+      };
+      const { error } = editingId
+        ? await supabase.from("plans").update(payload).eq("id", editingId)
+        : await supabase.from("plans").insert({
+            ...payload,
+            circle_id: circleId,
+            user_id: user.id,
+            activity: "other",
+          });
       if (error) throw error;
     },
     onSuccess: () => {
-      setTitle("");
-      setLocation("");
-      setFood("");
-      setNote("");
-      setStart("");
-      setEnd("");
+      const wasEditing = Boolean(editingId);
+      resetForm();
       setOpen(false);
-      toast.success("Destination added");
+      toast.success(wasEditing ? "Destination updated" : "Destination added");
       queryClient.invalidateQueries({ queryKey: ["circle", circleId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -121,25 +180,25 @@ function ItineraryPage() {
 
   if (detail.isLoading) {
     return (
-      <>
+      <AppShell>
         <p className="text-sm text-muted-foreground">Loading itinerary…</p>
-      </>
+      </AppShell>
     );
   }
   if (detail.isError || !detail.data) {
     return (
-      <>
+      <AppShell>
         <p className="text-sm text-muted-foreground">
           This itinerary isn&apos;t available.
         </p>
-      </>
+      </AppShell>
     );
   }
 
   const SelectedIcon = selected ? activityMeta(selected.activity).icon : MapPin;
 
   return (
-    <>
+    <AppShell>
       <div className="space-y-6">
         {/* Header */}
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-6">
@@ -154,11 +213,10 @@ function ItineraryPage() {
             <h1 className="mt-2 text-4xl font-bold">Itinerary</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {destinations.length}{" "}
-              {destinations.length === 1 ? "destination" : "destinations"}{" "}
-              planned
+              {destinations.length === 1 ? "destination" : "destinations"} planned
             </p>
           </div>
-          <Button className="gap-2" onClick={() => setOpen(true)}>
+          <Button className="gap-2" onClick={openAdd}>
             <Plus className="size-4" /> Add destination
           </Button>
         </header>
@@ -243,8 +301,7 @@ function ItineraryPage() {
                     </span>
                     <div>
                       <h2 className="text-2xl font-bold">
-                        {selected.title ||
-                          activityMeta(selected.activity).label}
+                        {selected.title || activityMeta(selected.activity).label}
                       </h2>
                       <p className="text-xs text-muted-foreground">
                         Added by {nameFor(selected.user_id)}
@@ -252,22 +309,45 @@ function ItineraryPage() {
                     </div>
                   </div>
                   {selected.user_id === user?.id ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-2 text-muted-foreground hover:text-destructive"
-                      onClick={() => remove.mutate(selected.id)}
-                    >
-                      <Trash2 className="size-4" /> Remove
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => openEdit(selected)}
+                      >
+                        <Pencil className="size-4" /> Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-2 text-muted-foreground hover:text-destructive"
+                        onClick={() => remove.mutate(selected.id)}
+                      >
+                        <Trash2 className="size-4" /> Remove
+                      </Button>
+                    </div>
                   ) : null}
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <Detail
                     icon={<CalendarDays className="size-4" />}
                     label="Dates"
                     value={formatWindow(selected.start_date, selected.end_date)}
+                  />
+                  <Detail
+                    icon={<Clock className="size-4" />}
+                    label="Time"
+                    value={
+                      selected.start_time
+                        ? `${selected.start_time.slice(0, 5)}${
+                            selected.end_time
+                              ? ` – ${selected.end_time.slice(0, 5)}`
+                              : ""
+                          }`
+                        : "—"
+                    }
                   />
                   <Detail
                     icon={<MapPin className="size-4" />}
@@ -335,42 +415,15 @@ function ItineraryPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add a destination</DialogTitle>
+            <DialogTitle>
+              {editingId ? "Edit destination" : "Add a destination"}
+            </DialogTitle>
             <DialogDescription>
               Where are we going, when, and what&apos;s the plan?
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Activity
-              </p>
-              <div className="mt-2 grid grid-cols-4 gap-2">
-                {ACTIVITIES.map((a) => {
-                  const Icon = a.icon;
-                  const active = a.key === activity;
-                  return (
-                    <button
-                      key={a.key}
-                      type="button"
-                      onClick={() => setActivity(a.key)}
-                      aria-pressed={active}
-                      className={cn(
-                        "flex flex-col items-center gap-1 rounded-xl border px-1 py-2.5 text-[10px] transition-colors",
-                        active
-                          ? "border-lime/60 bg-lime/15 text-lime"
-                          : "border-border bg-background text-muted-foreground hover:border-lime/30",
-                      )}
-                    >
-                      <Icon className="size-4" />
-                      {a.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <div className="grid grid-cols-2 gap-2.5">
               <label className="text-xs text-muted-foreground">
                 Start date
@@ -382,12 +435,30 @@ function ItineraryPage() {
                 />
               </label>
               <label className="text-xs text-muted-foreground">
+                Start time
+                <Input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="mt-1 bg-background"
+                />
+              </label>
+              <label className="text-xs text-muted-foreground">
                 End date
                 <Input
                   type="date"
                   value={end}
                   min={start || undefined}
                   onChange={(e) => setEnd(e.target.value)}
+                  className="mt-1 bg-background"
+                />
+              </label>
+              <label className="text-xs text-muted-foreground">
+                End time
+                <Input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
                   className="mt-1 bg-background"
                 />
               </label>
@@ -430,12 +501,12 @@ function ItineraryPage() {
               disabled={!start || save.isPending}
               onClick={() => save.mutate()}
             >
-              Add destination
+              {editingId ? "Save changes" : "Add destination"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </AppShell>
   );
 }
 
