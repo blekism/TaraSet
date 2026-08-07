@@ -168,3 +168,79 @@ export async function AddItinerary(_previousState: any, formdata: FormData) {
         data: data,
     };
 }
+
+export async function UpdateItineraryDetails(_previousState: any, formdata: FormData) {
+  const supabase = await createClient();
+
+  const itineraryId = formdata.get("itinerary_id") as string;
+
+  const name = formdata.get("name") as string;
+  const location = formdata.get("location") as string;
+  const start_date = formdata.get("start_date") as string;
+  const end_date = formdata.get("end_date") as string;
+  const notes = formdata.get("notes") as string;
+
+  const { data, error } = await supabase
+    .from("itinerary_tbl")
+    .update({
+      name: name, 
+      location: location, 
+      start_date: start_date, 
+      end_date: end_date, 
+      notes: notes, 
+    }) 
+    .select()
+    .eq("itineraryId", itineraryId);
+
+    if (error) {
+      console.log(error);
+      return {
+        code: 0,
+        message: "An error has occurred. Please try again later",
+      };
+    }
+    console.log("data is: ", data);
+    return {
+        code: 1,
+        message: "Itinerary Details Updated Successfully.",
+        data: data,
+    };
+}
+
+export async function DeleteDate(_previousState: any, formdata: FormData) {
+  const supabase = await createClient();
+
+  // const circleId = formdata.get("circle_id") as string;
+  const date_id = formdata.get("date_id") as string;
+
+  // const result = await ValidateCode(circleId);
+
+  // if (result.code === 0) {
+  //   return {
+  //     code: 0,
+  //     message: "Circle does not exist!",
+  //   }
+  // }
+
+  const { data, error } = await supabase
+    .from("circle_dates_tbl")
+    .delete() 
+    .select()
+    .eq("date_id", date_id);
+
+    if (error) {
+      console.log(error);
+      return {
+        code: 0,
+        message: "An error has occurred. Please try again later",
+      };
+    }
+    console.log("data is: ", data);
+    return {
+        code: 1,
+        message: "Date Deleted Successfully.",
+        data: data,
+    };
+}
+
+
