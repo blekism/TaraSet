@@ -48,7 +48,7 @@ export async function GetCircle(circle_id: string) {
   if (!circle_id) {
     return {
       code: 0,
-      message: "Paper not found...",
+      message: "Circle not found...",
     };
   }
 
@@ -81,6 +81,48 @@ export async function GetCircle(circle_id: string) {
     };
   } catch (error) {
     console.log("the paper error is: ", error);
+
+    return {
+      code: 0,
+      message: "An error has occured, please try again later...",
+    };
+  }
+}
+
+export async function GetItinerary(circle_id: string) {
+  const supabase = await createClient();
+
+  if (!circle_id) {
+    return {
+      code: 0,
+      message: "Circle not found...",
+    };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("itinerary_tbl")
+      .select(`*`)
+      .eq("circle_id", circle_id)
+      .maybeSingle();
+
+    if (error) {
+      console.log("the itinerary error is: ", error);
+
+      return {
+        code: 0,
+        message: error.message,
+      };
+    }
+    console.log("the itinerary  is: ", data);
+
+    return {
+      code: 1,
+      data: data,
+      message: "itinerary retreived successfully",
+    };
+  } catch (error) {
+    console.log("the itinerary error is: ", error);
 
     return {
       code: 0,
