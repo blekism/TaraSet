@@ -1,5 +1,3 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -13,7 +11,7 @@ import {
 import { toast } from "sonner";
 
 import { ACTIVITIES, activityMeta } from "@/components/PlanPanel";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button";
 import {
   Dialog,
   DialogContent,
@@ -21,10 +19,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+} from "@/components/dialog";
+import { Input } from "@/components/input";
+import { Textarea } from "@/components/textarea";
+// import { supabase } from "@/integrations/supabase/client";
 import { formatWindow } from "@/lib/availability";
 // import { fetchCircleDetail } from "@/lib/queries";
 // import { useSession } from "@/hooks/useSession";
