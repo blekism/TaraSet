@@ -116,7 +116,7 @@ export async function JoinCircle(_previousState: any, formdata: FormData) {
     }
     console.log("data is: ", data);
     return {
-        code: 0,
+        code: 1,
         message: "Circle Created Successfully.",
         data: data,
     };
@@ -126,22 +126,31 @@ export async function AddItinerary(_previousState: any, formdata: FormData) {
   const supabase = await createClient();
 
   const code = formdata.get("circle_code") as string;
+  const name = formdata.get("name") as string;
+  const location = formdata.get("location") as string;
+  const start_date = formdata.get("start_date") as string;
+  const end_date = formdata.get("end_date") as string;
+  const notes = formdata.get("notes") as string;
 
   const result = await ValidateCode(code);
 
   if (result.code === 0) {
     return {
       code: 0,
-      message: "Circle does not exist!"
+      message: "Circle does not exist!",
     }
   }
 
   const { data, error } = await supabase
-    .from("cicle_members_tbl")
+    .from("itinerary_tbl")
     .insert({
       circle_id: result.data.circle_id,
-      user_id: await supabase.auth.getSession(),
-    })
+      name: name, 
+      location: location, 
+      start_date: start_date, 
+      end_date: end_date, 
+      notes: notes, 
+    }) 
     .select()
     .single();
 
@@ -154,8 +163,8 @@ export async function AddItinerary(_previousState: any, formdata: FormData) {
     }
     console.log("data is: ", data);
     return {
-        code: 0,
-        message: "Circle Created Successfully.",
+        code: 1,
+        message: "Itinerary added Successfully.",
         data: data,
     };
 }
