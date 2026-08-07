@@ -9,12 +9,12 @@ import {
   Plus,
   Trash2,
   UtensilsCrossed,
+  MapPinCheckInside,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { AppShell } from "@/components/AppShell";
 import { activityMeta } from "@/components/PlanPanel";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/button";
 import {
   Dialog,
   DialogContent,
@@ -30,27 +30,6 @@ import { formatWindow } from "@/lib/availability";
 import { fetchCircleDetail } from "@/lib/queries";
 import { useSession } from "@/hooks/useSession";
 import { cn } from "@/lib/utils";
-
-export const Route = createFileRoute("/_authenticated/circles/$circleId_/itinerary")({
-  head: () => ({
-    meta: [
-      { title: "Itinerary · whenfree" },
-      {
-        name: "description",
-        content:
-          "Build the itinerary for your circle — destinations, activities, food and locations in one place.",
-      },
-      { property: "og:title", content: "Itinerary · whenfree" },
-      {
-        property: "og:description",
-        content: "Destinations and activities for your circle's next trip.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: ItineraryPage,
-});
 
 function ItineraryPage() {
   const { circleId } = Route.useParams();
@@ -178,25 +157,25 @@ function ItineraryPage() {
 
   if (detail.isLoading) {
     return (
-      <AppShell>
+      <>
         <p className="text-sm text-muted-foreground">Loading itinerary…</p>
-      </AppShell>
+      </>
     );
   }
   if (detail.isError || !detail.data) {
     return (
-      <AppShell>
+      <>
         <p className="text-sm text-muted-foreground">
           This itinerary isn&apos;t available.
         </p>
-      </AppShell>
+      </>
     );
   }
 
-  const SelectedIcon = selected ? activityMeta(selected.activity).icon : MapPin;
+  // const SelectedIcon = selected ? activityMeta(selected.activity).icon : MapPin;
 
   return (
-    <AppShell>
+    <>
       <div className="space-y-6">
         {/* Header */}
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-6">
@@ -211,7 +190,8 @@ function ItineraryPage() {
             <h1 className="mt-2 text-4xl font-bold">Itinerary</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {destinations.length}{" "}
-              {destinations.length === 1 ? "destination" : "destinations"} planned
+              {destinations.length === 1 ? "destination" : "destinations"}{" "}
+              planned
             </p>
           </div>
           <Button className="gap-2" onClick={openAdd}>
@@ -295,12 +275,10 @@ function ItineraryPage() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <span className="flex size-11 items-center justify-center rounded-xl bg-lime/15 text-lime ring-1 ring-lime/30">
-                      <SelectedIcon className="size-5" />
+                      <MapPinCheckInside className="size-5" />
                     </span>
                     <div>
-                      <h2 className="text-2xl font-bold">
-                        {selected.title || activityMeta(selected.activity).label}
-                      </h2>
+                      <h2 className="text-2xl font-bold">{selected.title}</h2>
                       <p className="text-xs text-muted-foreground">
                         Added by {nameFor(selected.user_id)}
                       </p>
@@ -504,7 +482,7 @@ function ItineraryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AppShell>
+    </>
   );
 }
 
