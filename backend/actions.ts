@@ -279,4 +279,39 @@ export async function DeleteDestination(_previousState: any, formdata: FormData)
     };
 }
 
+export async function DeleteCircle(_previousState: any, formdata: FormData) {
+  const supabase = await createClient();
+
+  const circleId = formdata.get("circle_id") as string;
+
+  const result = await ValidateCode(circleId);
+
+  if (result.code === 0) {
+    return {
+      code: 0,
+      message: "Circle does not exist!",
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("circle_dates_tbl")
+    .delete() 
+    .select()
+    .eq("circle_id", result.data.circle_id);
+
+    if (error) {
+      console.log(error);
+      return {
+        code: 0,
+        message: "An error has occurred. Please try again later",
+      };
+    }
+    console.log("data is: ", data);
+    return {
+        code: 1,
+        message: "Circle Deleted Successfully.",
+        data: data,
+    };
+}
+
 
