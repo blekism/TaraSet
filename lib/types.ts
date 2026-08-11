@@ -42,3 +42,27 @@ export type OverlapWindow = {
   days: number;
   userIds: string[];
 };
+
+export interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export interface ItineraryShape {
+  itinerary_id: string;
+  cricles_tbl: {
+    circle_id: string;
+  };
+  name: string;
+  location: string;
+  start_date: string;
+  end_date: string;
+  notes: string;
+}
+
+export interface GetItineraryShape {
+  code: number;
+  message: string;
+  data: ItineraryShape | null;
+}

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/server";
+import { GetItineraryShape } from "@/lib/types";
 
 export async function GetCircles(user_id: string) {
   const supabase = await createClient();
@@ -89,13 +90,16 @@ export async function GetCircle(circle_id: string) {
   }
 }
 
-export async function GetItinerary(circle_id: string) {
+export async function GetItinerary(
+  circle_id: string,
+): Promise<GetItineraryShape> {
   const supabase = await createClient();
 
   if (!circle_id) {
     return {
       code: 0,
       message: "Circle not found...",
+      data: null,
     };
   }
 
@@ -112,6 +116,7 @@ export async function GetItinerary(circle_id: string) {
       return {
         code: 0,
         message: error.message,
+        data: null,
       };
     }
     console.log("the itinerary  is: ", data);
@@ -127,6 +132,7 @@ export async function GetItinerary(circle_id: string) {
     return {
       code: 0,
       message: "An error has occured, please try again later...",
+      data: null,
     };
   }
 }
