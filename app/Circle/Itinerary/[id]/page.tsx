@@ -12,8 +12,8 @@ import {
   MapPinCheckInside,
 } from "lucide-react";
 import { toast } from "sonner";
-
-import { activityMeta } from "@/components/PlanPanel";
+import { useRouter } from "next/navigation";
+import { activityMeta } from "@/components/planner";
 import { Button } from "@/components/button";
 import {
   Dialog,
@@ -27,14 +27,15 @@ import { Input } from "@/components/input";
 import { Textarea } from "@/components/textarea";
 // import { supabase } from "@/integrations/supabase/client";
 import { formatWindow } from "@/lib/availability";
-import { fetchCircleDetail } from "@/lib/queries";
+import { GetCircle } from "@/backend/read";
 import { useSession } from "@/hooks/useSession";
 import { cn } from "@/lib/utils";
+import { ItineraryShape, PageProps } from "@/lib/types";
+import Link from "next/link";
 
-function ItineraryPage() {
-  const { circleId } = Route.useParams();
+export default async function ItineraryPage({ params }: PageProps) {
+  const { id } = await params;
   const { user } = useSession();
-  const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
@@ -48,11 +49,21 @@ function ItineraryPage() {
   const [end, setEnd] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [itineraryData, setItineraryData] = useState<ItineraryShape | null>(
+    null,
+  );
 
-  const detail = useQuery({
-    queryKey: ["circle", circleId],
-    queryFn: () => fetchCircleDetail(circleId),
-  });
+  useEffect(() => {
+    async function getData() {
+      try {
+        const result = await GetCircle(id);
+      } catch (error) {
+        toast.error("");
+      }
+    }
+
+    getData();
+  }, []);
 
   const nameFor = (id: string) => {
     const p = detail.data?.profiles.find((x) => x.id === id);
@@ -109,52 +120,6 @@ function ItineraryPage() {
     setOpen(true);
   };
 
-  const save = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error("Not signed in");
-      if (!start) throw new Error("Pick a start date");
-      const payload = {
-        start_date: start,
-        end_date: end || start,
-        start_time: startTime || null,
-        end_time: endTime || null,
-        title: title.trim() || null,
-        location: location.trim() || null,
-        food: food.trim() || null,
-        note: note.trim() || null,
-      };
-      const { error } = editingId
-        ? await supabase.from("plans").update(payload).eq("id", editingId)
-        : await supabase.from("plans").insert({
-            ...payload,
-            circle_id: circleId,
-            user_id: user.id,
-            activity: "other",
-          });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      const wasEditing = Boolean(editingId);
-      resetForm();
-      setOpen(false);
-      toast.success(wasEditing ? "Destination updated" : "Destination added");
-      queryClient.invalidateQueries({ queryKey: ["circle", circleId] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("plans").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Removed");
-      queryClient.invalidateQueries({ queryKey: ["circle", circleId] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   if (detail.isLoading) {
     return (
       <>
@@ -181,8 +146,7 @@ function ItineraryPage() {
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-6">
           <div>
             <Link
-              to="/circles/$circleId"
-              params={{ circleId }}
+              href={`/circles/${id}`}
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="size-3" /> Back to {detail.data.circle.name}
