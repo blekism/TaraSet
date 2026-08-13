@@ -4,7 +4,7 @@ import { useState, useEffect, useActionState } from "react";
 import { Input } from "@/components/input";
 import { Button } from "@/components/button";
 import { Plus } from "lucide-react";
-import { CreateCircle } from "@/backend/actions";
+import { CreateCircle, JoinCircle } from "@/backend/actions";
 import { toast } from "sonner";
 
 const initialState = {
@@ -17,22 +17,33 @@ export default function addCircle() {
 
     const [name, setName] = useState("");
     const [code, setCode] = useState("");
-    const [state, formAction, pending] = useActionState(CreateCircle, initialState);
+    const [createState, createFormAction, createPending] = useActionState(CreateCircle, initialState);
+    const [joinState, joinFormAction, joinPending] = useActionState(JoinCircle, initialState);
 
     useEffect(() => {
-    if (!state.message) return;
+    if (!createState.message || !joinState.message) return;
 
-    if (state.code === 1) {
-      toast.success(state.message);
+    if (createState.code === 1 || joinState.code === 1) {
+      toast.success(createState.message);
     } else {
-      toast.error(state.message);
+      toast.error(createState.message);
     }
-  }, [state]);
+  }, [createState, joinState]);
 
-  if (pending) {
+  // useEffect(() => {
+  //   if (!joinState.message) return;
+
+  //   if (joinState.code === 1) {
+  //     toast.success(joinState.message);
+  //   } else {
+  //     toast.error(joinState.message);
+  //   }
+  // }, [joinState]);
+
+  if (createPending || joinPending ) {
     return (
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-        Registering...
+        Processing...
       </div>
     );
   }
@@ -40,12 +51,12 @@ export default function addCircle() {
     return (
         <>
         <form
-          action={formAction}
+          action={createFormAction}
           className="rounded-xl border border-border bg-surface p-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (name.trim()) create.mutate(name.trim());
-          }}
+          // onSubmit={(e) => {
+          //   e.preventDefault();
+          //   if (name.trim()) create.mutate(name.trim());
+          // }}
         >
           <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
             Start a circle
@@ -59,7 +70,7 @@ export default function addCircle() {
           />
           <Button
             type="submit"
-            disabled={!name.trim() || create.isPending}
+            disabled={!name.trim() || createPending}
             className="mt-3 w-full"
           >
             <Plus className="size-4" /> Create
@@ -67,11 +78,12 @@ export default function addCircle() {
         </form>
 
         <form
+          action={joinFormAction}
           className="rounded-xl border border-border bg-surface p-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (code.trim()) join.mutate(code.trim());
-          }}
+          // onSubmit={(e) => {
+          //   e.preventDefault();
+          //   if (code.trim()) join.mutate(code.trim());
+          // }}
         >
           <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
             Join with a code
@@ -86,7 +98,7 @@ export default function addCircle() {
           <Button
             type="submit"
             variant="secondary"
-            disabled={!code.trim() || join.isPending}
+            disabled={!code.trim() || joinPending}
             className="mt-3 w-full"
           >
             Join circle
