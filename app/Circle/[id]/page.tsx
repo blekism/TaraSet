@@ -1,36 +1,28 @@
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { DateRange } from "react-day-picker";
 import { eachDayOfInterval, parseISO } from "date-fns";
 import { ArrowLeft, Check, Copy, Sparkles, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
-
-// import { AppShell } from "@/components/AppShell";
 import { PlanPanel } from "@/components/planner";
 import { Button } from "@/components/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar } from "@/components/calendar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 // import { supabase } from "@/integrations/supabase/client";
 // import { fetchCircleDetail } from "@/lib/queries";
 import { computeOverlaps, dayKey, formatWindow } from "@/lib/availability";
-// import { useSession } from "@/hooks/useSession";
+import { useSession } from "@/hooks/useSession";
 import { cn } from "@/lib/utils";
+import { PageProps } from "@/lib/types";
+import { GetCircles } from "@/backend/read";
 
-export default function CircleDetail() {
-  const { circleId } = Route.useParams();
-  const { user } = useSession();
-  const queryClient = useQueryClient();
-  const [range, setRange] = useState<DateRange | undefined>();
-  const [planTarget, setPlanTarget] = useState<
-    { start: string; end: string } | undefined
-  >();
-
-  const detail = useQuery({
-    queryKey: ["circle", circleId],
-    queryFn: () => fetchCircleDetail(circleId),
-  });
+export default async function CircleDetail({ params } : PageProps) {
+  const { id } = await params ;
+  
+  // const { user } = useSession();
 
   const nameFor = (id: string) => {
-    const p = detail.data?.profiles.find((x) => x.id === id);
+    const p = detail.data?. .find((x) => x.id === id);
     return p?.display_name ?? p?.email ?? "Someone";
   };
 
@@ -41,52 +33,20 @@ export default function CircleDetail() {
   const memberCount = detail.data?.members.length ?? 0;
   const best = overlaps.slice(0, 5);
 
-  const addRange = useMutation({
-    mutationFn: async (r: DateRange) => {
-      if (!user || !r.from) throw new Error("Pick a date first");
-      const { error } = await supabase.from("availabilities").insert({
-        circle_id: circleId,
-        user_id: user.id,
-        start_date: dayKey(r.from),
-        end_date: dayKey(r.to ?? r.from),
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      setRange(undefined);
-      toast.success("Dates added");
-      queryClient.invalidateQueries({ queryKey: ["circle", circleId] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const removeRange = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("availabilities")
-        .delete()
-        .eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["circle", circleId] }),
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   if (detail.isLoading) {
     return (
-      <AppShell>
+      <>
         <p className="text-sm text-muted-foreground">Loading circle…</p>
-      </AppShell>
+      </>
     );
   }
   if (detail.isError || !detail.data) {
     return (
-      <AppShell>
+      <>
         <p className="text-sm text-muted-foreground">
           This circle isn&apos;t available.
         </p>
-      </AppShell>
+      </>
     );
   }
 
@@ -106,14 +66,16 @@ export default function CircleDetail() {
     availabilities.filter((a) => a.user_id !== user?.id),
   );
 
+
+
+
   return (
     <>
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_23rem]">
-        {/* ── Left column: planning content ── */}
         <div className="min-w-0 space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
-              to="/circles"
+              href="/circles"
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="size-3" /> All circles
