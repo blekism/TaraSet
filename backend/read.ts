@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/server";
-import { GetItineraryShape } from "@/lib/types";
+import { GetCircleShape, GetItineraryShape } from "@/lib/types";
 
 export async function GetCircles(user_id: string) {
   const supabase = await createClient();
@@ -43,12 +43,13 @@ export async function GetCircles(user_id: string) {
   }
 }
 
-export async function GetCircle(circle_id: string) {
+export async function GetCircle(circle_id: string): Promise<GetCircleShape> {
   const supabase = await createClient();
 
   if (!circle_id) {
     return {
       code: 0,
+      data: null,
       message: "Circle not found...",
     };
   }
@@ -59,8 +60,7 @@ export async function GetCircle(circle_id: string) {
       .select(
         `*, 
         circle_members_tbl(*, user_tbl(username)),
-        circle_dates_tbl(*, user_tbl(username)),
-        `,
+        circle_dates_tbl(*, user_tbl(username))`,
       )
       .eq("circle_id", circle_id)
       .maybeSingle();
@@ -70,6 +70,7 @@ export async function GetCircle(circle_id: string) {
 
       return {
         code: 0,
+        data: null,
         message: error.message,
       };
     }
@@ -85,6 +86,7 @@ export async function GetCircle(circle_id: string) {
 
     return {
       code: 0,
+      data: null,
       message: "An error has occured, please try again later...",
     };
   }
@@ -107,8 +109,7 @@ export async function GetItinerary(
     const { data, error } = await supabase
       .from("itinerary_tbl")
       .select(`*`)
-      .eq("circle_id", circle_id)
-      .maybeSingle();
+      .eq("circle_id", circle_id);
 
     if (error) {
       console.log("the itinerary error is: ", error);
