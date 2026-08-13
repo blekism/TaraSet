@@ -5,11 +5,12 @@ import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
 import AddCircle from "@/components/addCircle";
+import { createClient } from "@/lib/server";
 
-export default function CirclesPage() {
+export default async function CirclesPage() {
   const supabase = await createClient();
 
-  const 
+  // const 
 
   return (
     <>
@@ -23,7 +24,7 @@ export default function CirclesPage() {
       </div>
 
       <div className="mt-10 space-y-3">
-        {circles.isLoading ? (
+        {/* {circles.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : circles.data?.length ? (
           circles.data.map((c) => (
@@ -51,7 +52,7 @@ export default function CirclesPage() {
           <p className="rounded-xl border border-dashed border-border px-5 py-10 text-center text-sm text-muted-foreground">
             No circles yet. Create one above and share the code.
           </p>
-        )}
+        )} */}
       </div>
     </>
   );
