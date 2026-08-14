@@ -21,24 +21,26 @@ export default function addCircle() {
     const [joinState, joinFormAction, joinPending] = useActionState(JoinCircle, initialState);
 
     useEffect(() => {
-    if (!createState.message || !joinState.message) return;
+    if (!createState.message) return;
 
-    if (createState.code === 1 || joinState.code === 1) {
+    if (createState.code === 1) {
       toast.success(createState.message);
+      setName("");
     } else {
       toast.error(createState.message);
     }
-  }, [createState, joinState]);
+  }, [createState]);
 
-  // useEffect(() => {
-  //   if (!joinState.message) return;
+  useEffect(() => {
+    if (!joinState.message) return;
 
-  //   if (joinState.code === 1) {
-  //     toast.success(joinState.message);
-  //   } else {
-  //     toast.error(joinState.message);
-  //   }
-  // }, [joinState]);
+    if (joinState.code === 1) {
+      toast.success(joinState.message);
+      setName("");
+    } else {
+      toast.error(joinState.message);
+    }
+  }, [joinState]);
 
   if (createPending || joinPending ) {
     return (
@@ -62,6 +64,7 @@ export default function addCircle() {
             Start a circle
           </h2>
           <Input
+            name="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Weekend crew"
@@ -89,6 +92,7 @@ export default function addCircle() {
             Join with a code
           </h2>
           <Input
+            name="circle_code"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             placeholder="A7K2QX"
