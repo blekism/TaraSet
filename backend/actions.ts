@@ -17,9 +17,6 @@ export async function CreateCircle(_previousState: any, formdata: FormData) {
   const circleName = formdata.get("name") as string;
 
   const user = await supabase.auth.getUser();
-  if(!user) {
-    return;
-  }
 
   console.log("name is: ", circleName);
 
@@ -99,10 +96,6 @@ export async function JoinCircle(_previousState: any, formdata: FormData) {
   const supabase = await createClient();
 
   const user = await supabase.auth.getUser();
-
-  if(!user) {
-    return;
-  }
 
   const code = formdata.get("circle_code") as string;
 
