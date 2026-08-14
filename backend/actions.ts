@@ -16,11 +16,20 @@ export async function CreateCircle(_previousState: any, formdata: FormData) {
 
   const circleName = formdata.get("name") as string;
 
+  const user = await supabase.auth.getUser();
+  if(!user) {
+    return;
+  }
+
+  console.log("name is: ", circleName);
+
   const { data, error } = await supabase
-    .from("cicles_tbl")
+    .from("circles_tbl")
     .insert({
       circle_name: circleName,
-      circle_code: generateCircleCode,
+      circle_code: generateCircleCode(),
+      total_members: 1,
+      owner_id: user.data.user?.id,
     })
     .select()
     .single();
@@ -63,8 +72,10 @@ export async function Login(_previousState: any) {
 export async function ValidateCode(code: string) {
   const supabase = await createClient();
 
+  console.log("im the code", code);
+
   const { data, error } = await supabase
-    .from("cicle_members_tbl")
+    .from("circles_tbl")
     .select("*")
     .eq("circle_code", code)
     .maybeSingle();
@@ -87,9 +98,17 @@ export async function ValidateCode(code: string) {
 export async function JoinCircle(_previousState: any, formdata: FormData) {
   const supabase = await createClient();
 
+  const user = await supabase.auth.getUser();
+
+  if(!user) {
+    return;
+  }
+
   const code = formdata.get("circle_code") as string;
 
   const result = await ValidateCode(code);
+
+  console.log("resulttttt", result);
 
   if (result.code === 0) {
     return {
@@ -99,10 +118,10 @@ export async function JoinCircle(_previousState: any, formdata: FormData) {
   }
 
   const { data, error } = await supabase
-    .from("cicle_members_tbl")
+    .from("circle_members_tbl")
     .insert({
       circle_id: result.data.circle_id,
-      user_id: await supabase.auth.getSession(),
+      user_id: user.data.user?.id,
     })
     .select()
     .single();
@@ -117,7 +136,7 @@ export async function JoinCircle(_previousState: any, formdata: FormData) {
     console.log("data is: ", data);
     return {
         code: 1,
-        message: "Circle Created Successfully.",
+        message: "Circle Joined Successfully.",
         data: data,
     };
 }
