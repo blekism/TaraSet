@@ -1,6 +1,5 @@
 import { ArrowRight, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
-
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
@@ -9,8 +8,6 @@ import { createClient } from "@/lib/server";
 
 export default async function CirclesPage() {
   const supabase = await createClient();
-
-  // const 
 
   return (
     <>
@@ -24,7 +21,7 @@ export default async function CirclesPage() {
       </div>
 
       <div className="mt-10 space-y-3">
-        {/* {circles.isLoading ? (
+        {circles.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : circles.data?.length ? (
           circles.data.map((c) => (
@@ -52,7 +49,7 @@ export default async function CirclesPage() {
           <p className="rounded-xl border border-dashed border-border px-5 py-10 text-center text-sm text-muted-foreground">
             No circles yet. Create one above and share the code.
           </p>
-        )} */}
+        )}
       </div>
     </>
   );
