@@ -13,10 +13,10 @@ export async function GetCircles(user_id: string) {
 
   try {
     const { data, error } = await supabase
-      .from("circles_tbl")
-      .select(`*`)
-      .eq("circle_id", user_id)
-      .maybeSingle();
+      .from("circle_members_tbl")
+      .select(`*, circles_tbl(*)`)
+      .eq("user_id", user_id);
+      // .maybeSingle();
 
     if (error) {
       console.log("the paper error is: ", error);

@@ -5,9 +5,23 @@ import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
 import AddCircle from "@/components/addCircle";
 import { createClient } from "@/lib/server";
+import { GetCircles } from "@/backend/read";
+import Link from "next/link";
 
 export default async function CirclesPage() {
   const supabase = await createClient();
+
+  const sessionData = await supabase.auth.getUser();
+
+  if(!sessionData.data.user) {
+    return;
+  }
+
+  const user_id = sessionData.data.user?.id;
+
+  const circles = await GetCircles(user_id);
+  console.log("my circles: ", circles.data);
+
 
   return (
     <>
@@ -21,24 +35,21 @@ export default async function CirclesPage() {
       </div>
 
       <div className="mt-10 space-y-3">
-        {circles.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
-        ) : circles.data?.length ? (
-          circles.data.map((c) => (
+        {circles.data!.length > 0 ? (
+          circles.data!.map((circle) => (
             <Link
-              key={c.id}
-              to="/circles/$circleId"
-              params={{ circleId: c.id }}
+              key={circle.circle_id}
+              href={`/Circle/${circle.circle_id}`}
               className="flex items-center justify-between rounded-xl border border-border bg-surface px-5 py-4 transition-colors hover:border-lime/50"
             >
               <div>
-                <p className="font-display text-lg font-semibold">{c.name}</p>
+                <p className="font-display text-lg font-semibold">{circle.circles_tbl.circle_name}</p>
                 <p className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1">
-                    <Users className="size-3" /> {c.member_count}
+                    <Users className="size-3" /> {circle.circles_tbl.total_members}
                   </span>
                   <span className="font-mono tracking-widest text-lime">
-                    {c.code}
+                    {circle.circles_tbl.circle_code}
                   </span>
                 </p>
               </div>

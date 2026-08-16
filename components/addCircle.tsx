@@ -31,16 +31,16 @@ export default function addCircle() {
     }
   }, [createState]);
 
-  useEffect(() => {
-    if (!joinState.message) return;
+  // useEffect(() => {
+  //   if (!joinState.message) return;
 
-    if (joinState.code === 1) {
-      toast.success(joinState.message);
-      setName("");
-    } else {
-      toast.error(joinState.message);
-    }
-  }, [joinState]);
+  //   if (joinState.code === 1) {
+  //     toast.success(joinState.message);
+  //     setName("");
+  //   } else {
+  //     toast.error(joinState.message);
+  //   }
+  // }, [joinState]);
 
   if (createPending || joinPending ) {
     return (

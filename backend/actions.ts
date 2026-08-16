@@ -14,6 +14,8 @@ export async function CreateCircle(_previousState: any, formdata: FormData) {
     ).join("");
   }
 
+  const code = generateCircleCode();
+
   const circleName = formdata.get("name") as string;
 
   const user = await supabase.auth.getUser();
@@ -24,7 +26,7 @@ export async function CreateCircle(_previousState: any, formdata: FormData) {
     .from("circles_tbl")
     .insert({
       circle_name: circleName,
-      circle_code: generateCircleCode(),
+      circle_code: code,
       total_members: 1,
       owner_id: user.data.user?.id,
     })
@@ -39,6 +41,15 @@ export async function CreateCircle(_previousState: any, formdata: FormData) {
       };
     }
     console.log("data is: ", data);
+    const state = {};
+    const form = new FormData();
+    form.append("circle_code", code);
+
+    const joinAsMember = await JoinCircle(
+      state,
+      form
+    )
+
     return {
         code: 1,
         message: "Circle Created Successfully.",
@@ -85,6 +96,7 @@ export async function ValidateCode(code: string) {
       };
     }
     console.log("data is: ", data);
+    console.log("error: ", error);
     return {
         code: 1,
         message: "Circle Validated!",
