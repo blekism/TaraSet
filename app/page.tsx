@@ -66,10 +66,10 @@ export default function Home() {
           <Button asChild size="lg">
             <button
               onClick={() => {
-                signIn();
+                router.push("/Login")
               }}
             >
-              Continue with Google
+              Sign in 
             </button>
           </Button>
         </div>

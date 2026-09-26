@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en" className={` h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background dot-grid">
         <Header />
-        <main className="mx-auto max-w-5xl px-5 py-10">{children}</main>
+        <main className="mx-auto w-full max-w-5xl px-5 py-10">{children}</main>
         <Toaster
           richColors
           duration={5000}
