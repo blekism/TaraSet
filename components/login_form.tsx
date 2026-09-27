@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Login } from "@/backend/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { ensureCsrfToken } from "@/lib/auth";
 
 const initialState = {
   success: false,
@@ -16,6 +17,10 @@ export default function LoginHandlerForm() {
   const [password, setPassword] = useState("");
   const [state, formAction, pending] = useActionState(Login, initialState);
   const router = useRouter();
+
+  useEffect(()=> {
+    ensureCsrfToken();
+  }, []);
 
   useEffect(() => {
     if (!state.message) return;
