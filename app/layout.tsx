@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/header";
 import { Toaster } from "sonner";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,7 +18,9 @@ export default function RootLayout({
     <html lang="en" className={` h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background dot-grid">
         <Header />
-        <main className="mx-auto w-full max-w-5xl px-5 py-10">{children}</main>
+        <main className="mx-auto w-full max-w-5xl px-5 py-10">
+          <Providers>{children}</Providers>
+        </main>
         <Toaster
           richColors
           duration={5000}

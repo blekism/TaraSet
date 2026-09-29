@@ -1,18 +1,13 @@
-import { AuthError, Session, User } from "@supabase/auth-js";
-
 export type Server_Res = {
-  code: number;
-  data?: {
-    user: User | null;
-    session: Session | null;
+  status: number;
+  data: {
+    id?: string;
+    email?: string;
+    error?: string;
+    status?: string;
+    circle?: Circle;
+    circles?: Circle[];
   };
-  error?: AuthError | null;
-};
-
-export type Session_Response = {
-  code: number;
-  message: string;
-  session?: Session | null;
 };
 
 export type Plan = {

@@ -7,13 +7,14 @@ import AddCircle from "@/components/addCircle";
 import { createClient } from "@/lib/server";
 import { GetCircles } from "@/backend/read";
 import Link from "next/link";
+import { Circle } from "@/lib/types";
 
 export default async function CirclesPage() {
   const supabase = await createClient();
 
   const sessionData = await supabase.auth.getUser();
 
-  if(!sessionData.data.user) {
+  if (!sessionData.data.user) {
     return;
   }
 
@@ -21,7 +22,6 @@ export default async function CirclesPage() {
 
   const circles = await GetCircles(user_id);
   console.log("my circles: ", circles.data);
-
 
   return (
     <>
@@ -36,20 +36,22 @@ export default async function CirclesPage() {
 
       <div className="mt-10 space-y-3">
         {circles.data!.length > 0 ? (
-          circles.data!.map((circle) => (
+          circles.data!.map((circle: Circle) => (
             <Link
               key={circle.circle_id}
               href={`/Circle/${circle.circle_id}`}
               className="flex items-center justify-between rounded-xl border border-border bg-surface px-5 py-4 transition-colors hover:border-lime/50"
             >
               <div>
-                <p className="font-display text-lg font-semibold">{circle.circles_tbl.circle_name}</p>
+                <p className="font-display text-lg font-semibold">
+                  {circle.circle_name}
+                </p>
                 <p className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1">
-                    <Users className="size-3" /> {circle.circles_tbl.total_members}
+                    <Users className="size-3" /> {circle.total_members}
                   </span>
                   <span className="font-mono tracking-widest text-lime">
-                    {circle.circles_tbl.circle_code}
+                    {circle.circle_code}
                   </span>
                 </p>
               </div>
