@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useActionState } from "react";
 import { Loader2 } from "lucide-react";
-import { Login } from "@/backend/actions";
+import { Login } from "@/backend/insert.controller";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ensureCsrfToken } from "@/lib/auth";
@@ -18,7 +18,7 @@ export default function LoginHandlerForm() {
   const [state, formAction, pending] = useActionState(Login, initialState);
   const router = useRouter();
 
-  useEffect(()=> {
+  useEffect(() => {
     ensureCsrfToken();
   }, []);
 

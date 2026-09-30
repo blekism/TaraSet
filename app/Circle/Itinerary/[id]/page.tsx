@@ -1,6 +1,6 @@
 import { ArrowLeft, Plus } from "lucide-react";
 import { Button } from "@/components/button";
-import { GetCircle, GetItinerary } from "@/backend/read";
+import { GetCircle, GetItinerary } from "@/backend/read.controller";
 import { PageProps } from "@/lib/types";
 import Link from "next/link";
 import ItineraryClient from "@/components/ItineraryComp/dest_card";

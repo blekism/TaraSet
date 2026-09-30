@@ -14,15 +14,13 @@
 // import { useSession } from "@/hooks/useSession";
 // import { cn } from "@/lib/utils";
 import { PageProps } from "@/lib/types";
-import { GetCircle } from "@/backend/read";
+import { GetCircle } from "@/backend/read.controller";
 import CircleDetailClient from "@/components/circleDetailClient";
 
-
-export default async function CircleDetail({ params } : PageProps) {
-  const { id } = await params ;
+export default async function CircleDetail({ params }: PageProps) {
+  const { id } = await params;
 
   const detail = await GetCircle(id);
-
 
   // const queryClient = useQueryClient();
   // const [range, setRange] = useState<DateRange | undefined>();
@@ -30,12 +28,11 @@ export default async function CircleDetail({ params } : PageProps) {
   //   { start: string; end: string } | undefined
   // >();
 
-
   // const detail = useQuery({
   //   queryKey: ["circle", id],
   //   queryFn: () => fetchCircleDetail(id),
   // });
-  
+
   // const nameFor = (id: string) => {
   //   const p = detail.data?. .find((x) => x.id === id);
   //   return p?.display_name ?? p?.email ?? "Someone";
@@ -84,7 +81,7 @@ export default async function CircleDetail({ params } : PageProps) {
   return (
     <>
       <div>
-         <CircleDetailClient id={id} detail={detail} />
+        <CircleDetailClient id={id} detail={detail} />
       </div>
     </>
   );

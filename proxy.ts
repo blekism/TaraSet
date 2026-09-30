@@ -1,8 +1,8 @@
 import { type NextRequest } from "next/server";
-import { updateSession } from "@/lib/middleware";
+import { middleware } from "@/lib/middleware";
 
 export async function proxy(request: NextRequest) {
-  return await updateSession(request);
+  return await middleware(request);
 }
 
 export const config = {

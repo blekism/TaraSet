@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { createUserClient } from "@/lib/client";
 
 const STEPS = [
   {
@@ -28,23 +27,6 @@ const STEPS = [
 export default function Home() {
   const [busy, setBusy] = useState(false);
   const router = useRouter();
-  const supabase = createUserClient();
-
-  async function signIn() {
-    setBusy(true);
-    const result = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/Circles`,
-      },
-    });
-    if (result.error) {
-      setBusy(false);
-      toast.error("Could not sign in. Please try again.");
-      return;
-    }
-    router.replace("/Circles");
-  }
 
   return (
     <>
@@ -66,10 +48,10 @@ export default function Home() {
           <Button asChild size="lg">
             <button
               onClick={() => {
-                router.push("/Login")
+                router.push("/Login");
               }}
             >
-              Sign in 
+              Sign in
             </button>
           </Button>
         </div>

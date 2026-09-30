@@ -5,7 +5,7 @@ import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
 import AddCircle from "@/components/addCircle";
 import { createClient } from "@/lib/server";
-import { GetCircles } from "@/backend/read";
+import { GetCircles } from "@/backend/read.controller";
 import Link from "next/link";
 import { Circle } from "@/lib/types";
 
@@ -20,7 +20,7 @@ export default async function CirclesPage() {
 
   const user_id = sessionData.data.user?.id;
 
-  const circles = await GetCircles(user_id);
+  const circles = await GetCircles();
   console.log("my circles: ", circles.data);
 
   return (

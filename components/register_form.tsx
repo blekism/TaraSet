@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useActionState } from "react";
 import { Loader2 } from "lucide-react";
-import { Register } from "@/backend/actions";
+import { Register } from "@/backend/insert.controller";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ensureCsrfToken } from "@/lib/auth";
@@ -21,7 +21,7 @@ export default function RegisterHandlerForm() {
 
   useEffect(() => {
     ensureCsrfToken();
-  })
+  });
 
   useEffect(() => {
     if (!state.message) return;

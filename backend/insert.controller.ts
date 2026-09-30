@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/server";
-import * as auth from "@/services/auth";
-import { register, login } from "@/services/auth";
+import * as auth from "@/services/auth.service";
+import { register, login } from "@/services/auth.service";
 import { redirect } from "next/navigation";
 // import * as cf from "@/repositories/circleFunctions";
 
@@ -92,8 +92,9 @@ export async function CreateCircle(_previousState: any, formdata: FormData) {
 
   function generateCircleCode(length = 6): string {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    return Array.from({ length }, () =>
-      chars[Math.floor(Math.random() * chars.length)]
+    return Array.from(
+      { length },
+      () => chars[Math.floor(Math.random() * chars.length)],
     ).join("");
   }
 
@@ -116,28 +117,25 @@ export async function CreateCircle(_previousState: any, formdata: FormData) {
     .select()
     .single();
 
-    if (error) {
-      console.log(error);
-      return {
-        code: 0,
-        message: "An error has occurred. Please try again later",
-      };
-    }
-    console.log("data is: ", data);
-    const state = {};
-    const form = new FormData();
-    form.append("circle_code", code);
-
-    const joinAsMember = await JoinCircle(
-      state,
-      form
-    )
-
+  if (error) {
+    console.log(error);
     return {
-        code: 1,
-        message: "Circle Created Successfully.",
-        data: data,
+      code: 0,
+      message: "An error has occurred. Please try again later",
     };
+  }
+  console.log("data is: ", data);
+  const state = {};
+  const form = new FormData();
+  form.append("circle_code", code);
+
+  const joinAsMember = await JoinCircle(state, form);
+
+  return {
+    code: 1,
+    message: "Circle Created Successfully.",
+    data: data,
+  };
 }
 
 // export async function Login(_previousState: any) {
@@ -171,20 +169,20 @@ export async function ValidateCode(code: string) {
     .eq("circle_code", code)
     .maybeSingle();
 
-    if (error) {
-      console.log(error);
-      return {
-        code: 0,
-        message: "An error has occurred. Please try again later",
-      };
-    }
-    console.log("data is: ", data);
-    console.log("error: ", error);
+  if (error) {
+    console.log(error);
     return {
-        code: 1,
-        message: "Circle Validated!",
-        data: data,
+      code: 0,
+      message: "An error has occurred. Please try again later",
     };
+  }
+  console.log("data is: ", data);
+  console.log("error: ", error);
+  return {
+    code: 1,
+    message: "Circle Validated!",
+    data: data,
+  };
 }
 
 export async function JoinCircle(_previousState: any, formdata: FormData) {
@@ -201,8 +199,8 @@ export async function JoinCircle(_previousState: any, formdata: FormData) {
   if (result.code === 0) {
     return {
       code: 0,
-      message: "Circle does not exist!"
-    }
+      message: "Circle does not exist!",
+    };
   }
 
   const { data, error } = await supabase
@@ -214,19 +212,19 @@ export async function JoinCircle(_previousState: any, formdata: FormData) {
     .select()
     .single();
 
-    if (error) {
-      console.log(error);
-      return {
-        code: 0,
-        message: "An error has occurred. Please try again later",
-      };
-    }
-    console.log("data is: ", data);
+  if (error) {
+    console.log(error);
     return {
-        code: 1,
-        message: "Circle Joined Successfully.",
-        data: data,
+      code: 0,
+      message: "An error has occurred. Please try again later",
     };
+  }
+  console.log("data is: ", data);
+  return {
+    code: 1,
+    message: "Circle Joined Successfully.",
+    data: data,
+  };
 }
 
 export async function AddItinerary(_previousState: any, formdata: FormData) {
@@ -245,38 +243,41 @@ export async function AddItinerary(_previousState: any, formdata: FormData) {
     return {
       code: 0,
       message: "Circle does not exist!",
-    }
+    };
   }
 
   const { data, error } = await supabase
     .from("itinerary_tbl")
     .insert({
       circle_id: result.data.circle_id,
-      name: name, 
-      location: location, 
-      start_date: start_date, 
-      end_date: end_date, 
-      notes: notes, 
-    }) 
+      name: name,
+      location: location,
+      start_date: start_date,
+      end_date: end_date,
+      notes: notes,
+    })
     .select()
     .single();
 
-    if (error) {
-      console.log(error);
-      return {
-        code: 0,
-        message: "An error has occurred. Please try again later",
-      };
-    }
-    console.log("data is: ", data);
+  if (error) {
+    console.log(error);
     return {
-        code: 1,
-        message: "Itinerary added Successfully.",
-        data: data,
+      code: 0,
+      message: "An error has occurred. Please try again later",
     };
+  }
+  console.log("data is: ", data);
+  return {
+    code: 1,
+    message: "Itinerary added Successfully.",
+    data: data,
+  };
 }
 
-export async function UpdateItineraryDetails(_previousState: any, formdata: FormData) {
+export async function UpdateItineraryDetails(
+  _previousState: any,
+  formdata: FormData,
+) {
   const supabase = await createClient();
 
   const itineraryId = formdata.get("itinerary_id") as string;
@@ -290,31 +291,34 @@ export async function UpdateItineraryDetails(_previousState: any, formdata: Form
   const { data, error } = await supabase
     .from("itinerary_tbl")
     .update({
-      name: name, 
-      location: location, 
-      start_date: start_date, 
-      end_date: end_date, 
-      notes: notes, 
-    }) 
+      name: name,
+      location: location,
+      start_date: start_date,
+      end_date: end_date,
+      notes: notes,
+    })
     .select()
     .eq("itineraryId", itineraryId);
 
-    if (error) {
-      console.log(error);
-      return {
-        code: 0,
-        message: "An error has occurred. Please try again later",
-      };
-    }
-    console.log("data is: ", data);
+  if (error) {
+    console.log(error);
     return {
-        code: 1,
-        message: "Itinerary Details Updated Successfully.",
-        data: data,
+      code: 0,
+      message: "An error has occurred. Please try again later",
     };
+  }
+  console.log("data is: ", data);
+  return {
+    code: 1,
+    message: "Itinerary Details Updated Successfully.",
+    data: data,
+  };
 }
 
-export async function DeleteDestination(_previousState: any, formdata: FormData) {
+export async function DeleteDestination(
+  _previousState: any,
+  formdata: FormData,
+) {
   const supabase = await createClient();
 
   // const circleId = formdata.get("circle_id") as string;
@@ -331,23 +335,23 @@ export async function DeleteDestination(_previousState: any, formdata: FormData)
 
   const { data, error } = await supabase
     .from("circle_dates_tbl")
-    .delete() 
+    .delete()
     .select()
     .eq("date_id", date_id);
 
-    if (error) {
-      console.log(error);
-      return {
-        code: 0,
-        message: "An error has occurred. Please try again later",
-      };
-    }
-    console.log("data is: ", data);
+  if (error) {
+    console.log(error);
     return {
-        code: 1,
-        message: "Destination Deleted Successfully.",
-        data: data,
+      code: 0,
+      message: "An error has occurred. Please try again later",
     };
+  }
+  console.log("data is: ", data);
+  return {
+    code: 1,
+    message: "Destination Deleted Successfully.",
+    data: data,
+  };
 }
 
 export async function DeleteCircle(_previousState: any, formdata: FormData) {
@@ -361,28 +365,28 @@ export async function DeleteCircle(_previousState: any, formdata: FormData) {
     return {
       code: 0,
       message: "Circle does not exist!",
-    }
+    };
   }
 
   const { data, error } = await supabase
     .from("circle_dates_tbl")
-    .delete() 
+    .delete()
     .select()
     .eq("circle_id", result.data.circle_id);
 
-    if (error) {
-      console.log(error);
-      return {
-        code: 0,
-        message: "An error has occurred. Please try again later",
-      };
-    }
-    console.log("data is: ", data);
+  if (error) {
+    console.log(error);
     return {
-        code: 1,
-        message: "Circle Deleted Successfully.",
-        data: data,
+      code: 0,
+      message: "An error has occurred. Please try again later",
     };
+  }
+  console.log("data is: ", data);
+  return {
+    code: 1,
+    message: "Circle Deleted Successfully.",
+    data: data,
+  };
 }
 
 export async function DeleteDate(_previousState: any, formdata: FormData) {
@@ -402,23 +406,21 @@ export async function DeleteDate(_previousState: any, formdata: FormData) {
 
   const { data, error } = await supabase
     .from("circle_dates_tbl")
-    .delete() 
+    .delete()
     .select()
     .eq("date_id", date_id);
 
-    if (error) {
-      console.log(error);
-      return {
-        code: 0,
-        message: "An error has occurred. Please try again later",
-      };
-    }
-    console.log("data is: ", data);
+  if (error) {
+    console.log(error);
     return {
-        code: 1,
-        message: "Date Deleted Successfully.",
-        data: data,
+      code: 0,
+      message: "An error has occurred. Please try again later",
     };
+  }
+  console.log("data is: ", data);
+  return {
+    code: 1,
+    message: "Date Deleted Successfully.",
+    data: data,
+  };
 }
-
-
