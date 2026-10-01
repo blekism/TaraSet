@@ -3,18 +3,17 @@ import Link from "next/link";
 import { FileText, Loader2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import RegisterHandlerForm from "@/components/register_form";
-import { createClient } from "@/lib/server";
 
 export default async function RegisterPage() {
-  const supabase = await createClient();
+  // const supabase = await createClient();
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // const {
+  //   data: { session },
+  // } = await supabase.auth.getSession();
 
-  if (session) {
-    redirect("/Circles");
-  }
+  // if (session) {
+  //   redirect("/Circles");
+  // }
 
   return (
     <div className="grid min-h-screen place-items-center bg-background px-4">

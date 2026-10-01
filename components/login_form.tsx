@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Login } from "@/backend/insert.controller";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { ensureCsrfToken } from "@/lib/auth";
+import { ensureCsrfToken } from "@/services/auth.service";
 
 const initialState = {
   success: false,
@@ -27,10 +27,11 @@ export default function LoginHandlerForm() {
 
     if (state.success) {
       toast.success(state.message);
+      router.replace("/Circles");
     } else {
       toast.error(state.message);
     }
-  }, [state]);
+  }, [state, router]);
 
   if (pending) {
     return (

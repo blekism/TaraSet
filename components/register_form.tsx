@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Register } from "@/backend/insert.controller";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { ensureCsrfToken } from "@/lib/auth";
+import { ensureCsrfToken } from "@/services/auth.service";
 
 const initialState = {
   success: false,
@@ -28,6 +28,7 @@ export default function RegisterHandlerForm() {
 
     if (state.success) {
       toast.success(state.message);
+      router.replace("/Login");
     } else {
       toast.error(state.message);
     }
@@ -100,7 +101,7 @@ export default function RegisterHandlerForm() {
           Already have an account?{" "}
           <button
             className="text-brand hover:underline"
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/Login")}
           >
             Sign in
           </button>

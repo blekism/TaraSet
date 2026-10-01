@@ -1,89 +1,80 @@
 import * as auth from "@/repositories/auth";
-import { createClient } from "@/lib/server";
-import { register, login } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getCsrfToken } from "../lib/csrf";
+import { apiFetch } from "../backend/api";
 
 // export type User = { id: string; email: string; name: string };
 
-export async function Register(_previousState: any, formdata: FormData) {
-  const email = formdata.get("email") as string;
-  const password = formdata.get("password") as string;
-  const name = formdata.get("name") as string;
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-  if (!email.trim() || !password.trim() || !name.trim()) {
-    return {
-      success: false,
-      message: "Email, Password, and Username are required.",
-    };
+export async function register(
+  email: string,
+  password: string,
+  username: string,
+) {
+  //-------------------------execute function-------------------
+  const res = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": getCsrfToken(),
+    },
+    body: JSON.stringify({ email, password, username }),
+  });
+  //-------------------------execute function-------------------
+
+  //-------------------------throw the error--------------------
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? "Registration failed");
   }
+  //-------------------------throw the error--------------------
 
-  if (name.trim().length < 2) {
-    return {
-      success: false,
-      message: "Username cannot be shorter than 2 characters.",
-    };
-  }
+  //-------------------------parse json result------------------
+  const message = await res.json();
+  //-------------------------parse json result------------------
 
-  if (password.length < 8) {
-    return {
-      success: false,
-      message: "Password must at least be 8 characters.",
-    };
-  }
-
-  let data;
-
-  try {
-    data = await register(email, password, name.trim());
-  } catch (error) {
-    return {
-      success: false,
-      message: "An error has occurred, please try again later.",
-    };
-  }
-
-  if (data.status === 500) {
-    return {
-      success: false,
-      message: data.data.error,
-    };
-  }
-
-  redirect("/");
+  //-------------------------return parsed result---------------
+  return {
+    status: res.status,
+    data: message,
+  };
+  //-------------------------return parsed result---------------
 }
 
-export async function Login(_previousState: any, formdata: FormData) {
-  const email = formdata.get("email") as string;
-  const password = formdata.get("password") as string;
+export async function login(email: string, password: string) {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": getCsrfToken(),
+    },
+    body: JSON.stringify({ email, password }),
+  });
 
-  if (!email.trim() || !password.trim()) {
-    return {
-      success: false,
-      message: "Email and Password are required.",
-    };
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? "Login failed");
   }
 
-  let data;
+  const message = await res.json();
 
-  try {
-    data = await login(email, password);
-  } catch (error) {
-    console.error(error);
-    return {
-      success: false,
-      message: "An error has occured, please try again later.",
-    };
-  }
+  return {
+    status: res.status,
+    data: message,
+  };
+}
 
-  if (data.status !== 200) {
-    console.log(data, "in if else");
-    return {
-      success: false,
-      message: data.data.error,
-    };
+export async function logout() {
+  return apiFetch("api/logout", { method: "POST" });
+}
+
+export async function ensureCsrfToken() {
+  if (!getCsrfToken()) {
+    await fetch(`${API_URL}/csrf-token`, { credentials: "include" });
   }
-  console.log(data, "in redirect");
-  redirect("/dashboard");
 }
 
 // import * as auth from "@/repositories/auth";

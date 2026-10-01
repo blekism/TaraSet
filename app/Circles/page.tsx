@@ -3,23 +3,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
-import AddCircle from "@/components/addCircle";
-import { createClient } from "@/lib/server";
+// import AddCircle from "@/components/addCircle";
 import { GetCircles } from "@/backend/read.controller";
 import Link from "next/link";
 import { Circle } from "@/lib/types";
 
 export default async function CirclesPage() {
-  const supabase = await createClient();
-
-  const sessionData = await supabase.auth.getUser();
-
-  if (!sessionData.data.user) {
-    return;
-  }
-
-  const user_id = sessionData.data.user?.id;
-
   const circles = await GetCircles();
   console.log("my circles: ", circles.data);
 
@@ -31,10 +20,10 @@ export default async function CirclesPage() {
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <AddCircle />
+        {/* <AddCircle /> */}
       </div>
 
-      <div className="mt-10 space-y-3">
+      {/* <div className="mt-10 space-y-3">
         {circles.data!.length > 0 ? (
           circles.data!.map((circle: Circle) => (
             <Link
@@ -63,7 +52,7 @@ export default async function CirclesPage() {
             No circles yet. Create one above and share the code.
           </p>
         )}
-      </div>
+      </div> */}
     </>
   );
 }
