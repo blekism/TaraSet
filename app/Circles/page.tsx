@@ -12,9 +12,6 @@ import { Circle } from "@/lib/types";
 import { useEffect, useState } from "react";
 
 export default function CirclesPage() {
-  // const circles = await GetCircles();
-  // console.log("my circles: ", circles);
-
   const [allCircles, setAllCircles] = useState([]);
 
   useEffect(() => {

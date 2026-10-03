@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
 import { GetCircle } from "@/backend/read.controller";
 import { computeOverlaps, dayKey, formatWindow } from "@/lib/availability";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/app/authProvider";
 
 interface Props {
   id: string;
@@ -22,7 +23,13 @@ interface Props {
 
 export default function CircleDetailClient(id: Props) {
   console.log("circle id", id);
-  // const { user } = useSession();
+
+  const { user } = useAuth();
+
+  const currentUserId = user?.id;
+
+  console.log("my id", currentUserId);
+
   const [range, setRange] = useState<DateRange | undefined>();
   const [planTarget, setPlanTarget] = useState<
     { start: string; end: string } | undefined
@@ -53,8 +60,10 @@ export default function CircleDetailClient(id: Props) {
   const best = overlaps.slice(0, 5);
 
   // const { circle, members, availabilities } = detail.data;
-  // const mine = circle?.data?.tbl3cmtbl.filter((a) => a.user_id.id === user?.id);
-  const marked = new Set(circle?.data?.tbl3cmtbl.map((a) => a.user_id.id));
+  // const mine = circle?.data?.tbl3cmtbl.filter(
+  //   (a) => a.user_id.id === currentUserId,
+  // );
+  // const marked = new Set(circle?.data?.tbl3cmtbl.map((a) => a.user_id.id));
 
   // const daysOf = (rows: typeof availabilities) =>
   //   rows.flatMap((a) =>
@@ -102,13 +111,13 @@ export default function CircleDetailClient(id: Props) {
               <p className="mt-1 text-sm text-muted-foreground">
                 {circle?.data?.total_members.length}{" "}
                 {circle?.data?.total_members.length === 1 ? "person" : "people"}{" "}
-                · {marked.size} marked their dates
+                {/* · {marked.size} marked their dates */}
               </p>
             </div>
           </header>
 
           {/* Best dates */}
-          <section className="rounded-2xl border border-border bg-surface p-6">
+          {/* <section className="rounded-2xl border border-border bg-surface p-6">
             <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
               <Sparkles className="size-4 text-lime" /> Best dates to meet
             </h2>
@@ -175,7 +184,7 @@ export default function CircleDetailClient(id: Props) {
                 })}
               </ul>
             )}
-          </section>
+          </section> */}
 
           {/* Calendar + participants */}
           <div className="grid gap-6 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">

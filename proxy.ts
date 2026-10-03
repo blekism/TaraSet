@@ -1,9 +1,16 @@
 import { type NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+const PROTECTED_PATHS = ["/Circles", "/Circle/:id*", "/Circle/Itinerary/:id*"];
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
+  if (!isProtected) {
+    return NextResponse.next();
+  }
   const accessToken = request.cookies.get("accessToken");
   if (accessToken) return NextResponse.next();
 
@@ -23,7 +30,7 @@ export async function proxy(request: NextRequest) {
   });
 
   if (!refreshRes.ok) {
-    return NextResponse.redirect(new URL("/login", request.url)); // refresh token rejected/revoked
+    return NextResponse.redirect(new URL("/Login", request.url)); // refresh token rejected/revoked
   }
 
   const response = NextResponse.next();
