@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useSession } from "@/hooks/useSession";
+import { useState, useEffect, useMemo } from "react";
+// import { useSession } from "@/hooks/useSession";
 import type { GetCircleShape } from "@/lib/types";
 import Link from "next/link";
 import type { DateRange } from "react-day-picker";
@@ -12,27 +12,69 @@ import { PlanPanel } from "@/components/planner";
 import { Button } from "@/components/button";
 import { Calendar } from "@/components/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { GetCircle } from "@/backend/read.controller";
+import { computeOverlaps, dayKey, formatWindow } from "@/lib/availability";
+import { cn } from "@/lib/utils";
 
 interface Props {
   id: string;
-  detail: GetCircleShape;
 }
 
-export default function CircleDetailClient({ id, detail }: Props) {
-  const { user } = useSession();
+export default function CircleDetailClient(id: Props) {
+  console.log("circle id", id);
+  // const { user } = useSession();
   const [range, setRange] = useState<DateRange | undefined>();
   const [planTarget, setPlanTarget] = useState<
     { start: string; end: string } | undefined
   >();
 
-  return(
+  const [circle, setCircle] = useState<GetCircleShape | null>(null);
+
+  useEffect(() => {
+    async function circle() {
+      const circleDetail = await GetCircle(id.id);
+      console.log("circleDetail.data:", circleDetail);
+      setCircle(circleDetail);
+    }
+
+    circle();
+  }, []);
+
+  const nameFor = (id: string) => {
+    const p = circle?.data?.tbl2cmtbl.find((x) => x.member_id === id);
+    return p?.user_tbl.username ?? "Someone";
+  };
+
+  const overlaps = useMemo(
+    () => computeOverlaps(circle?.data?.tbl3cmtbl ?? []),
+    [circle?.data],
+  );
+  const memberCount = circle?.data?.total_members.length ?? 0;
+  const best = overlaps.slice(0, 5);
+
+  // const { circle, members, availabilities } = detail.data;
+  // const mine = circle?.data?.tbl3cmtbl.filter((a) => a.user_id.id === user?.id);
+  const marked = new Set(circle?.data?.tbl3cmtbl.map((a) => a.user_id.id));
+
+  // const daysOf = (rows: typeof availabilities) =>
+  //   rows.flatMap((a) =>
+  //     eachDayOfInterval({
+  //       start: parseISO(a.start_date),
+  //       end: parseISO(a.end_date),
+  //     }),
+  //   );
+  // const myDays = daysOf(mine);
+  // const groupDays = daysOf(
+  //   availabilities.filter((a) => a.user_id !== user?.id),
+  // );
+
+  return (
     <>
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_23rem]">
-        
         <div className="min-w-0 space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
-              href="/circles"
+              href="/Circles"
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="size-3" /> All circles
@@ -40,32 +82,37 @@ export default function CircleDetailClient({ id, detail }: Props) {
             <button
               type="button"
               onClick={() => {
-                // void navigator.clipboard.writeText(circle.code);
+                void navigator.clipboard.writeText(
+                  circle?.data?.circle_code ?? "",
+                );
                 toast.success("Invite code copied");
               }}
               className="inline-flex items-center gap-2 rounded-lg border border-lime/40 bg-lime/10 px-4 py-2.5 font-mono text-sm tracking-[0.35em] text-lime transition-colors hover:bg-lime/20"
             >
-              {/* {circle.code} */}
+              {circle?.data?.circle_code}
               <Copy className="size-3.5" />
             </button>
           </div>
 
           <header className="rounded-2xl border border-border bg-surface p-6">
             <div>
-              {/* <h1 className="text-4xl font-bold">{circle.name}</h1>
+              <h1 className="text-4xl font-bold">
+                {circle?.data?.circle_name}
+              </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                {members.length} {members.length === 1 ? "person" : "people"} ·{" "}
-                {marked.size} marked their dates
-              </p> */}
+                {circle?.data?.total_members.length}{" "}
+                {circle?.data?.total_members.length === 1 ? "person" : "people"}{" "}
+                · {marked.size} marked their dates
+              </p>
             </div>
           </header>
 
           {/* Best dates */}
-          {/* <section className="rounded-2xl border border-border bg-surface p-6">
+          <section className="rounded-2xl border border-border bg-surface p-6">
             <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
               <Sparkles className="size-4 text-lime" /> Best dates to meet
             </h2>
-            {best.length === 0 ? (
+            {circle?.data?.tbl3cmtbl.length === 0 ? (
               <p className="mt-4 text-sm text-muted-foreground">
                 Nothing yet — mark your free dates below and nudge the others.
               </p>
@@ -128,7 +175,7 @@ export default function CircleDetailClient({ id, detail }: Props) {
                 })}
               </ul>
             )}
-          </section> */}
+          </section>
 
           {/* Calendar + participants */}
           <div className="grid gap-6 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
@@ -175,7 +222,7 @@ export default function CircleDetailClient({ id, detail }: Props) {
                   Your dates
                 </p>
                 <ul className="mt-2 flex flex-wrap gap-2">
-                  {/* {range?.from ? (
+                  {range?.from ? (
                     <li className="inline-flex items-center gap-2 rounded-full border border-lime/50 bg-lime/10 px-3 py-1.5 text-xs text-lime">
                       {formatWindow(
                         dayKey(range.from),
@@ -191,7 +238,7 @@ export default function CircleDetailClient({ id, detail }: Props) {
                       </button>
                     </li>
                   ) : null}
-                  {mine.map((a) => (
+                  {/* {mine.map((a) => (
                     <li
                       key={a.id}
                       className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs"
@@ -224,12 +271,12 @@ export default function CircleDetailClient({ id, detail }: Props) {
             </section>
 
             {/* Members + their dates */}
-            <section className="min-w-0 space-y-3">
+            {/* <section className="min-w-0 space-y-3">
               <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                 Participants
               </h2>
-              {/* {members.map((m) => {
-                const theirs = availabilities.filter(
+              {circle?.data?.tbl2cmtbl.map((m) => { 
+                const theirs = m..filter(
                   (a) => a.user_id === m.user_id,
                 );
                 const profile = detail.data.profiles.find(
@@ -237,7 +284,7 @@ export default function CircleDetailClient({ id, detail }: Props) {
                 );
                 return (
                   <div
-                    key={m.id}
+                    key={m.}
                     className="rounded-2xl border border-border bg-surface p-4"
                   >
                     <div className="flex items-center gap-3">
@@ -286,14 +333,14 @@ export default function CircleDetailClient({ id, detail }: Props) {
                     )}
                   </div>
                 );
-              })} */}
-              {/* {mine.length === 0 ? ( */}
-                <p className="text-xs text-muted-foreground">
-                  Tip: add every window that works for you — overlaps are found
-                  automatically.
-                </p>
-              {/* ) : null} */}
-            </section>
+              })}
+              {mine.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Tip: add every window that works for you — overlaps are found
+                automatically.
+              </p>
+              ) : null}
+            </section> */}
           </div>
         </div>
 
@@ -310,5 +357,5 @@ export default function CircleDetailClient({ id, detail }: Props) {
         </div>
       </div>
     </>
-  )
+  );
 }

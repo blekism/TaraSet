@@ -1,13 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/button";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
+import { logout } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const name = "John doe";
   const avatar = "";
+
+  const router = useRouter();
 
   return (
     <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur">
@@ -28,7 +33,7 @@ export default function Header() {
           <Button
             variant="ghost"
             size="icon"
-            //   onClick={signOut}
+            onClick={logout}
             aria-label="Sign out"
           >
             <LogOut className="size-4" />

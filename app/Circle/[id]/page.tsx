@@ -13,14 +13,13 @@
 // import { computeOverlaps, dayKey, formatWindow } from "@/lib/availability";
 // import { useSession } from "@/hooks/useSession";
 // import { cn } from "@/lib/utils";
+
 import { PageProps } from "@/lib/types";
-import { GetCircle } from "@/backend/read.controller";
+// import { GetCircle } from "@/backend/read.controller";
 import CircleDetailClient from "@/components/circleDetailClient";
 
 export default async function CircleDetail({ params }: PageProps) {
   const { id } = await params;
-
-  const detail = await GetCircle(id);
 
   // const queryClient = useQueryClient();
   // const [range, setRange] = useState<DateRange | undefined>();
@@ -81,7 +80,7 @@ export default async function CircleDetail({ params }: PageProps) {
   return (
     <>
       <div>
-        <CircleDetailClient id={id} detail={detail} />
+        <CircleDetailClient id={id} />
       </div>
     </>
   );

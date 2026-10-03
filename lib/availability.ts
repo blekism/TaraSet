@@ -1,5 +1,5 @@
 import { addDays, differenceInCalendarDays, format, parseISO } from "date-fns";
-import { AvailabilityRange, OverlapWindow } from "./types";
+import { CircleDates, OverlapWindow } from "./types";
 
 export const HORIZON_DAYS = 240;
 
@@ -14,7 +14,7 @@ export function dayKey(date: Date) {
  * most people, then longest, then soonest.
  */
 export function computeOverlaps(
-  ranges: AvailabilityRange[],
+  ranges: CircleDates[],
   from: Date = new Date(),
 ): OverlapWindow[] {
   if (ranges.length === 0) return [];
@@ -32,7 +32,7 @@ export function computeOverlaps(
     const span = differenceInCalendarDays(rEnd, rStart);
     for (let i = 0; i <= span; i++) {
       const key = dayKey(addDays(rStart, i));
-      perDay.get(key)?.add(range.user_id);
+      perDay.get(key)?.add(range.user_id.id);
     }
   }
 

@@ -37,12 +37,14 @@ export interface Circle {
   circle_id: string;
   circle_name: string;
   circle_code: string;
+  owner_id: string;
   total_members: string;
+  tbl2cmtbl: CircleMember[];
+  tbl3cmtbl: CircleDates[];
   user_tbl: {
     username: string;
+    email: string;
   };
-  circle_members_tbl: CircleMember[];
-  circle_dates_tbl: CircleDates[];
 }
 
 export interface CircleMember {
@@ -56,8 +58,10 @@ export interface CircleMember {
 export interface CircleDates {
   date_id: string;
   created_at: string;
-  date_available: string;
+  start_date: string;
+  end_date: string;
   user_id: {
+    id: string;
     username: string;
   };
 }

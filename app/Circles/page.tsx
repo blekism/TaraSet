@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowRight, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/button";
@@ -7,10 +9,22 @@ import { Input } from "@/components/input";
 import { GetCircles } from "@/backend/read.controller";
 import Link from "next/link";
 import { Circle } from "@/lib/types";
+import { useEffect, useState } from "react";
 
-export default async function CirclesPage() {
-  const circles = await GetCircles();
-  console.log("my circles: ", circles.data);
+export default function CirclesPage() {
+  // const circles = await GetCircles();
+  // console.log("my circles: ", circles);
+
+  const [allCircles, setAllCircles] = useState([]);
+
+  useEffect(() => {
+    async function loadCircles() {
+      const circles = await GetCircles();
+      setAllCircles(circles.data);
+    }
+
+    loadCircles();
+  }, []);
 
   return (
     <>
@@ -23,9 +37,9 @@ export default async function CirclesPage() {
         {/* <AddCircle /> */}
       </div>
 
-      {/* <div className="mt-10 space-y-3">
-        {circles.data!.length > 0 ? (
-          circles.data!.map((circle: Circle) => (
+      <div className="mt-10 space-y-3">
+        {allCircles.length > 0 ? (
+          allCircles.map((circle: Circle) => (
             <Link
               key={circle.circle_id}
               href={`/Circle/${circle.circle_id}`}
@@ -52,7 +66,7 @@ export default async function CirclesPage() {
             No circles yet. Create one above and share the code.
           </p>
         )}
-      </div> */}
+      </div>
     </>
   );
 }

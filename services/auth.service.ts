@@ -68,7 +68,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function logout() {
-  return apiFetch("api/logout", { method: "POST" });
+  return apiFetch(`${API_URL}/auth/logout`, { method: "POST" });
 }
 
 export async function ensureCsrfToken() {
