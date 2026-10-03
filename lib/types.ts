@@ -120,3 +120,15 @@ export interface HeaderProps {
   data: any;
   name: string;
 }
+
+export type User = {
+  id: string;
+  email: string;
+  username?: string;
+};
+
+export type UserContextValue = {
+  user: User | null;
+  userId: string | null;
+  loading: boolean;
+};

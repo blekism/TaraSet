@@ -1,34 +1,35 @@
 import { type NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const PROTECTED_PATHS = [
-  "/",
-  "/Circles",
-  "/Circle/:id",
-  "/Circle/Itinerary/:id",
-];
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-const AUTH_PATHS = ["/Login", "/Register"];
-
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const accessToken = request.cookies.get("accessToken");
+  if (accessToken) return NextResponse.next();
 
-  const { pathname } = request.nextUrl;
-
-  const isProtected = PROTECTED_PATHS.some((p) =>
-    request.nextUrl.pathname.startsWith(p),
-  );
-  const isAuthPage =
-    pathname.startsWith("/Login") || pathname.startsWith("/Register");
-
-  // if (isProtected && !accessToken) {
-  //   return NextResponse.redirect(new URL("/Login", request.url));
-  // }
-
-  if (isAuthPage && accessToken) {
-    return NextResponse.redirect(new URL("/Circles", request.url));
+  const refreshToken = request.cookies.get("refreshToken");
+  if (!refreshToken) {
+    return NextResponse.redirect(new URL("/Login", request.url));
   }
-  return NextResponse.next();
+
+  const csrfToken = request.cookies.get("csrfToken")?.value ?? "";
+
+  const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+    method: "POST",
+    headers: {
+      Cookie: request.headers.get("cookie") ?? "",
+      "X-CSRF-Token": csrfToken,
+    },
+  });
+
+  if (!refreshRes.ok) {
+    return NextResponse.redirect(new URL("/login", request.url)); // refresh token rejected/revoked
+  }
+
+  const response = NextResponse.next();
+  const newCookies = refreshRes.headers.getSetCookie();
+  newCookies.forEach((cookie) => response.headers.append("Set-Cookie", cookie));
+  return response;
 }
 
 export const config = {

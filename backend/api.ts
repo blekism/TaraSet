@@ -1,5 +1,7 @@
 // api.ts (frontend)
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+
 function getCsrfToken(): string | undefined {
   return document.cookie
     .split("; ")
@@ -11,7 +13,7 @@ let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
 async function refreshAccessToken(): Promise<boolean> {
-  const res = await fetch("/api/refresh", {
+  const res = await fetch(`${API_URL}/auth/refresh`, {
     method: "POST",
     credentials: "include",
     headers: { "X-CSRF-Token": getCsrfToken() ?? "" }, // refresh mutates state too — needs it
