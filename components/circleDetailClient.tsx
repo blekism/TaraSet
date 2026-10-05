@@ -366,7 +366,12 @@ export default function CircleDetailClient({ id }: Props) {
 
         {/* ── Right column: activity panel ── */}
         <div className="min-w-0 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1">
-          <PlanPanel circle_id={id} plans={itinerary} />
+          <PlanPanel
+            circle_id={id}
+            plans={itinerary}
+            target={planTarget}
+            onClearTarget={() => setPlanTarget(undefined)}
+          />
         </div>
       </div>
     </>

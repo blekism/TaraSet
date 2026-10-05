@@ -44,9 +44,11 @@ export function activityMeta(key: string) {
 interface Props {
   circle_id: string;
   plans: ItineraryShape[];
+  target: { start: string; end: string } | undefined;
+  onClearTarget: () => void;
 }
 
-export function PlanPanel({ circle_id, plans }: Props) {
+export function PlanPanel({ circle_id, plans, target, onClearTarget }: Props) {
   const [activity, setActivity] = useState<string>("food");
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -94,7 +96,7 @@ export function PlanPanel({ circle_id, plans }: Props) {
           )}
         </div>
 
-        <p className="mt-4 text-xs font-medium text-muted-foreground">
+        {/* <p className="mt-4 text-xs font-medium text-muted-foreground">
           What are we doing?
         </p>
         <div className="mt-2 grid grid-cols-4 gap-2">
@@ -159,7 +161,7 @@ export function PlanPanel({ circle_id, plans }: Props) {
           // onClick={() => save.mutate()}
         >
           Add to the plan
-        </Button>
+        </Button> */}
 
         <Button asChild variant="outline" className="mt-2 w-full gap-2">
           <Link href={`/Circle/Itinerary/${circle_id}`}>

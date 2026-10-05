@@ -33,6 +33,7 @@ export default function ItineraryPage({ params }: PageProps) {
 
       setCircle(circleData.data);
       setItinerary(itineraryData.data);
+      console.log(itineraryData.data);
       setIsLoading(false);
     }
 
