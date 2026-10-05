@@ -1,6 +1,7 @@
 import * as auth from "@/services/auth.service";
 import { redirect } from "next/navigation";
 import { register, login } from "@/services/auth.service";
+import { createCircle, joinCircle } from "@/services/circle.service";
 
 export async function Register(_previousState: any, formdata: FormData) {
   const email = formdata.get("email") as string;
@@ -79,56 +80,69 @@ export async function Login(_previousState: any, formdata: FormData) {
   }
 }
 
-// export async function CreateCircle(_previousState: any, formdata: FormData) {
-//   const supabase = await createClient();
+export async function CreateCircle(_previousState: any, formdata: FormData) {
+  const circleName = formdata.get("circle_name") as string;
 
-//   function generateCircleCode(length = 6): string {
-//     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-//     return Array.from(
-//       { length },
-//       () => chars[Math.floor(Math.random() * chars.length)],
-//     ).join("");
-//   }
+  if (!circleName) {
+    return {
+      success: false,
+      message: "Circle Name is required.",
+    };
+  }
 
-//   const code = generateCircleCode();
+  try {
+    console.log(circleName);
+    const res = await createCircle(circleName);
 
-//   const circleName = formdata.get("name") as string;
+    return {
+      code: 1,
+      data: res.data,
+      message: "Circle created successfully",
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      code: 0,
+      data: null,
+      message:
+        error instanceof Error
+          ? error.message
+          : "An error has occured, please try again later...",
+    };
+  }
+}
 
-//   const user = await supabase.auth.getUser();
+export async function JoinCircle(_previousState: any, formdata: FormData) {
+  const circleCode = formdata.get("circle_code") as string;
 
-//   console.log("name is: ", circleName);
+  if (!circleCode) {
+    return {
+      success: false,
+      message: "Circle code is required.",
+    };
+  }
 
-//   const { data, error } = await supabase
-//     .from("circles_tbl")
-//     .insert({
-//       circle_name: circleName,
-//       circle_code: code,
-//       total_members: 1,
-//       owner_id: user.data.user?.id,
-//     })
-//     .select()
-//     .single();
+  try {
+    console.log(circleCode);
+    const res = await joinCircle(circleCode);
 
-//   if (error) {
-//     console.log(error);
-//     return {
-//       code: 0,
-//       message: "An error has occurred. Please try again later",
-//     };
-//   }
-//   console.log("data is: ", data);
-//   const state = {};
-//   const form = new FormData();
-//   form.append("circle_code", code);
-
-//   const joinAsMember = await JoinCircle(state, form);
-
-//   return {
-//     code: 1,
-//     message: "Circle Created Successfully.",
-//     data: data,
-//   };
-// }
+    return {
+      code: 1,
+      data: res.data,
+      message: "Joined a circle successfully",
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      code: 0,
+      data: null,
+      message:
+        error instanceof Error
+          ? error.message
+          : "An error has occured, please try again later...",
+    };
+  }
+}
 
 // export async function Login(_previousState: any) {
 //   const supabase = await createClient();

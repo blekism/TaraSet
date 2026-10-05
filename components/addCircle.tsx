@@ -36,16 +36,16 @@ export default function addCircle() {
     }
   }, [createState]);
 
-  // useEffect(() => {
-  //   if (!joinState.message) return;
+  useEffect(() => {
+    if (!joinState.message) return;
 
-  //   if (joinState.code === 1) {
-  //     toast.success(joinState.message);
-  //     setName("");
-  //   } else {
-  //     toast.error(joinState.message);
-  //   }
-  // }, [joinState]);
+    if (joinState.code === 1) {
+      toast.success(joinState.message);
+      setCode("");
+    } else {
+      toast.error(joinState.message);
+    }
+  }, [joinState]);
 
   if (createPending || joinPending) {
     return (
@@ -69,7 +69,7 @@ export default function addCircle() {
           Start a circle
         </h2>
         <Input
-          name="name"
+          name="circle_name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Weekend crew"

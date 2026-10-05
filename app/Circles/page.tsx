@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 // import { fetchMyCircles, makeCode } from "@/lib/queries";
-// import AddCircle from "@/components/addCircle";
+import AddCircle from "@/components/addCircle";
 import { GetCircles } from "@/backend/read.controller";
 import Link from "next/link";
 import { Circle } from "@/lib/types";
@@ -31,7 +31,7 @@ export default function CirclesPage() {
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        {/* <AddCircle /> */}
+        <AddCircle />
       </div>
 
       <div className="mt-10 space-y-3">
