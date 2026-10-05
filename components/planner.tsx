@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { DateRange } from "react-day-picker";
 import {
@@ -22,7 +22,7 @@ import { Button } from "./button";
 import { Textarea } from "./textarea";
 import { Input } from "./input";
 import { cn } from "@/lib/utils";
-import { Plan } from "@/lib/types";
+import { ItineraryShape } from "@/lib/types";
 import { formatWindow } from "@/lib/availability";
 // import { formatWindow } from "@/lib/availability";
 
@@ -41,28 +41,22 @@ export function activityMeta(key: string) {
   return ACTIVITIES.find((a) => a.key === key) ?? ACTIVITIES[7];
 }
 
-type Props = {
-  circleId: string;
-  userId: string | undefined;
-  plans: Plan[];
-  target: { start: string; end: string } | undefined;
-  onClearTarget: () => void;
-  nameFor: (id: string) => string;
-};
+interface Props {
+  circle_id: string;
+  plans: ItineraryShape[];
+}
 
-export function PlanPanel({
-  circleId,
-  userId,
-  plans,
-  target,
-  onClearTarget,
-  nameFor,
-}: Props) {
+export function PlanPanel({ circle_id, plans }: Props) {
   const [activity, setActivity] = useState<string>("food");
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [food, setFood] = useState("");
   const [note, setNote] = useState("");
+
+  const sorted = useMemo(
+    () => [...plans].sort((a, b) => a.start_date.localeCompare(b.start_date)),
+    [plans],
+  );
 
   return (
     <aside className="space-y-4">
@@ -168,8 +162,8 @@ export function PlanPanel({
         </Button>
 
         <Button asChild variant="outline" className="mt-2 w-full gap-2">
-          <Link href={`/circles/$circleId/itinerary`}>
-            <ListChecks className="size-4" /> Build itinerary
+          <Link href={`/Circle/Itinerary/${circle_id}`}>
+            <ListChecks className="size-4" /> Add Events to the Plan
           </Link>
         </Button>
       </section>
@@ -178,62 +172,63 @@ export function PlanPanel({
         <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Ideas on the table
         </h3>
-        {data.length === 0 ? (
+        {sorted.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-xs text-muted-foreground">
             No ideas yet. Suggest what to do on a date everyone is free.
           </p>
         ) : (
-          data.map((p) => {
-            const meta = activityMeta(p.activity);
-            const Icon = meta.icon;
+          sorted.map((p) => {
+            // const meta = activityMeta(p.activity);
+            // const Icon = meta.icon;
             return (
               <article
-                key={p.id}
+                key={p.itinerary_id}
                 className="rounded-2xl border border-border bg-surface p-4"
               >
                 <div className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-lime/10 text-lime ring-1 ring-lime/25">
+                  {/* <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-lime/10 text-lime ring-1 ring-lime/25">
                     <Icon className="size-4" />
-                  </span>
+                  </span> */}
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-display font-semibold">
-                      {p.title || meta.label}
+                      {p.name}
+                      {/* {p.title || meta.label} */}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {formatWindow(p.start_date, p.end_date)} ·{" "}
-                      {nameFor(p.user_id)}
+                      {formatWindow(p.start_date, p.end_date)}
+                      {/* } ·{" "}{nameFor(p.user_id)} */}
                     </p>
                   </div>
-                  {p.user_id === userId ? (
-                    <button
-                      type="button"
-                      aria-label="Remove idea"
-                      // onClick={() => remove.mutate(p.id)}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  ) : null}
+                  {/* {p.user_id === userId ? ( */}
+                  <button
+                    type="button"
+                    aria-label="Remove idea"
+                    // onClick={() => remove.mutate(p.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                  {/* ) : null} */}
                 </div>
 
-                {p.location || p.food ? (
+                {p.location ? (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {p.location ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-xs">
                         <MapPin className="size-3 text-lime" /> {p.location}
                       </span>
                     ) : null}
-                    {p.food ? (
+                    {/* {p.food ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-xs">
                         <UtensilsCrossed className="size-3 text-lime" />{" "}
                         {p.food}
                       </span>
-                    ) : null}
+                    ) : null} */}
                   </div>
                 ) : null}
-                {p.note ? (
+                {p.notes ? (
                   <p className="mt-2.5 text-xs text-muted-foreground">
-                    {p.note}
+                    {p.notes}
                   </p>
                 ) : null}
               </article>

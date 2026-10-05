@@ -32,7 +32,7 @@ export function computeOverlaps(
     const span = differenceInCalendarDays(rEnd, rStart);
     for (let i = 0; i <= span; i++) {
       const key = dayKey(addDays(rStart, i));
-      perDay.get(key)?.add(range.user_id.id);
+      perDay.get(key)?.add(range.user_id);
     }
   }
 
@@ -57,7 +57,7 @@ export function computeOverlaps(
 
   return windows.sort(
     (a, b) =>
-      b.userIds.length - a.userIds.length ||
+      b.user_id.length - a.user_id.length ||
       b.days - a.days ||
       a.start.localeCompare(b.start),
   );
@@ -72,7 +72,7 @@ function toWindow(c: {
     start: c.start,
     end: c.end,
     days: differenceInCalendarDays(parseISO(c.end), parseISO(c.start)) + 1,
-    userIds: c.ids.split(","),
+    user_id: c.ids.split(","),
   };
 }
 

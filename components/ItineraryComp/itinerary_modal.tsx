@@ -28,7 +28,6 @@ import {
 import { Input } from "@/components/input";
 import { Textarea } from "@/components/textarea";
 import { formatWindow } from "@/lib/availability";
-import { useSession } from "@/hooks/useSession";
 import { cn } from "@/lib/utils";
 import AddDestinationBtn from "@/components/ItineraryComp/add_dest";
 
@@ -39,7 +38,6 @@ export default function ItineraryModal({
   initialData: any;
   circleId: string;
 }) {
-  const { user } = useSession();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
 
@@ -249,26 +247,26 @@ export default function ItineraryModal({
                       </p>
                     </div>
                   </div>
-                  {selected.user_id === user?.id ? (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        onClick={() => openEdit(selected)}
-                      >
-                        <Pencil className="size-4" /> Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="gap-2 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleRemove(selected.id)}
-                      >
-                        <Trash2 className="size-4" /> Remove
-                      </Button>
-                    </div>
-                  ) : null}
+                  {/* {selected.user_id === user?.id ? ( */}
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => openEdit(selected)}
+                    >
+                      <Pencil className="size-4" /> Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-2 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleRemove(selected.id)}
+                    >
+                      <Trash2 className="size-4" /> Remove
+                    </Button>
+                  </div>
+                  {/* ) : null} */}
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

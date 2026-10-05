@@ -10,22 +10,21 @@ export type Server_Res = {
   };
 };
 
-export type Plan = {
-  id: string;
-  circle_id: string;
-  user_id: string;
-  start_date: string;
-  end_date: string;
-  start_time: string | null;
-  end_time: string | null;
-  activity: string;
-  title: string | null;
-  location: string | null;
-  food: string | null;
-  note: string | null;
-  created_at: string;
-};
-
+// export type Plan = {
+//   id: string;
+//   circle_id: string;
+//   user_id: string;
+//   start_date: string;
+//   end_date: string;
+//   start_time: string | null;
+//   end_time: string | null;
+//   activity: string;
+//   title: string | null;
+//   location: string | null;
+//   food: string | null;
+//   note: string | null;
+//   created_at: string;
+// };
 export type Profile = {
   id: string;
   display_name: string | null;
@@ -40,19 +39,16 @@ export interface Circle {
   owner_id: string;
   total_members: string;
   tbl2cmtbl: CircleMember[];
-  tbl3cmtbl: CircleDates[];
-  user_tbl: {
-    username: string;
-    email: string;
-  };
+  tbl3cdtbl: CircleDates[];
 }
 
 export interface CircleMember {
   member_id: string;
   created_at: string;
-  user_tbl: {
+  tbl4utbl: {
     username: string;
   };
+  user_id: string;
 }
 
 export interface CircleDates {
@@ -60,8 +56,8 @@ export interface CircleDates {
   created_at: string;
   start_date: string;
   end_date: string;
-  user_id: {
-    id: string;
+  user_id: string;
+  tbl4utbl: {
     username: string;
   };
 }
@@ -77,7 +73,7 @@ export type OverlapWindow = {
   start: string;
   end: string;
   days: number;
-  userIds: string[];
+  user_id: string[];
 };
 
 export interface PageProps {
@@ -86,16 +82,24 @@ export interface PageProps {
   }>;
 }
 
+// export type Plan = {
+//   itinerary_id: string;
+//   circle_id: string;
+//   name: string;
+//   location: string | null;
+//   start_date: string;
+//   end_date: string;
+//   notes: string | null;
+// };
+
 export interface ItineraryShape {
   itinerary_id: string;
-  cricles_tbl: {
-    circle_id: string;
-  };
+  circle_id: string;
   name: string;
   location: string;
   start_date: string;
   end_date: string;
-  notes: string;
+  notes: string | null;
 }
 
 export interface GetItineraryShape {

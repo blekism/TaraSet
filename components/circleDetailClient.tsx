@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-// import { useSession } from "@/hooks/useSession";
-import type { GetCircleShape } from "@/lib/types";
+import type { Circle, ItineraryShape } from "@/lib/types";
 import Link from "next/link";
 import type { DateRange } from "react-day-picker";
 import { eachDayOfInterval, parseISO } from "date-fns";
@@ -12,7 +11,7 @@ import { PlanPanel } from "@/components/planner";
 import { Button } from "@/components/button";
 import { Calendar } from "@/components/calendar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/avatar";
-import { GetCircle } from "@/backend/read.controller";
+import { GetCircle, GetItinerary } from "@/backend/read.controller";
 import { computeOverlaps, dayKey, formatWindow } from "@/lib/availability";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/app/authProvider";
@@ -21,61 +20,78 @@ interface Props {
   id: string;
 }
 
-export default function CircleDetailClient(id: Props) {
-  console.log("circle id", id);
-
+export default function CircleDetailClient({ id }: Props) {
   const { user } = useAuth();
-
   const currentUserId = user?.id;
-
-  console.log("my id", currentUserId);
 
   const [range, setRange] = useState<DateRange | undefined>();
   const [planTarget, setPlanTarget] = useState<
     { start: string; end: string } | undefined
   >();
 
-  const [circle, setCircle] = useState<GetCircleShape | null>(null);
+  const [circle, setCircle] = useState<Circle | null>(null);
+  const [itinerary, setItinerary] = useState<ItineraryShape[] | null>(null);
+  // const [availableDates, setAvailableDates] = useState();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function circle() {
-      const circleDetail = await GetCircle(id.id);
-      console.log("circleDetail.data:", circleDetail);
-      setCircle(circleDetail);
+    async function data() {
+      const [circleData, itineraryData] = await Promise.all([
+        GetCircle(id),
+        GetItinerary(id),
+      ]);
+
+      if (circleData.code !== 1 || itineraryData.code !== 1) {
+        setError("Could not complete your request");
+        toast.error("Could not complete your request");
+      }
+
+      setCircle(circleData.data);
+      setItinerary(itineraryData.data);
+      setIsLoading(false);
     }
 
-    circle();
+    data();
   }, []);
 
+  const availableDates = circle?.tbl3cdtbl ?? [];
+  // const circleMembers = circle?.tbl2cmtbl!;
+
   const nameFor = (id: string) => {
-    const p = circle?.data?.tbl2cmtbl.find((x) => x.member_id === id);
-    return p?.user_tbl.username ?? "Someone";
+    const p = (circle?.tbl2cmtbl ?? []).find((x) => x.member_id === id);
+    return p?.tbl4utbl.username ?? "Someone";
   };
 
-  const overlaps = useMemo(
-    () => computeOverlaps(circle?.data?.tbl3cmtbl ?? []),
-    [circle?.data],
-  );
-  const memberCount = circle?.data?.total_members.length ?? 0;
+  const overlaps = useMemo(() => computeOverlaps(availableDates), [circle]);
+
+  const memberCount = circle?.total_members.length ?? 0;
   const best = overlaps.slice(0, 5);
 
-  // const { circle, members, availabilities } = detail.data;
-  // const mine = circle?.data?.tbl3cmtbl.filter(
-  //   (a) => a.user_id.id === currentUserId,
-  // );
-  // const marked = new Set(circle?.data?.tbl3cmtbl.map((a) => a.user_id.id));
+  const mine = availableDates.filter((a) => a.user_id === currentUserId);
+  const marked = new Set(availableDates.map((a) => a.user_id));
 
-  // const daysOf = (rows: typeof availabilities) =>
-  //   rows.flatMap((a) =>
-  //     eachDayOfInterval({
-  //       start: parseISO(a.start_date),
-  //       end: parseISO(a.end_date),
-  //     }),
-  //   );
-  // const myDays = daysOf(mine);
-  // const groupDays = daysOf(
-  //   availabilities.filter((a) => a.user_id !== user?.id),
-  // );
+  console.log("marked size:", marked.size);
+
+  const daysOf = (rows: typeof availableDates) =>
+    rows.flatMap((a) =>
+      eachDayOfInterval({
+        start: parseISO(a.start_date),
+        end: parseISO(a.end_date),
+      }),
+    );
+  const myDays = daysOf(mine);
+  const groupDays = daysOf(
+    availableDates.filter((a) => a.user_id !== currentUserId),
+  );
+
+  if (isLoading) {
+    return <div>Loading</div>;
+  }
+
+  if (error || !circle || !itinerary) {
+    return <div>error</div>;
+  }
 
   return (
     <>
@@ -91,37 +107,32 @@ export default function CircleDetailClient(id: Props) {
             <button
               type="button"
               onClick={() => {
-                void navigator.clipboard.writeText(
-                  circle?.data?.circle_code ?? "",
-                );
+                void navigator.clipboard.writeText(circle?.circle_code ?? "");
                 toast.success("Invite code copied");
               }}
               className="inline-flex items-center gap-2 rounded-lg border border-lime/40 bg-lime/10 px-4 py-2.5 font-mono text-sm tracking-[0.35em] text-lime transition-colors hover:bg-lime/20"
             >
-              {circle?.data?.circle_code}
+              {circle?.circle_code}
               <Copy className="size-3.5" />
             </button>
           </div>
 
           <header className="rounded-2xl border border-border bg-surface p-6">
             <div>
-              <h1 className="text-4xl font-bold">
-                {circle?.data?.circle_name}
-              </h1>
+              <h1 className="text-4xl font-bold">{circle?.circle_name}</h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                {circle?.data?.total_members.length}{" "}
-                {circle?.data?.total_members.length === 1 ? "person" : "people"}{" "}
-                {/* · {marked.size} marked their dates */}
+                {memberCount} {memberCount === 1 ? "person" : "people"} ·{" "}
+                {marked.size} marked their dates
               </p>
             </div>
           </header>
 
           {/* Best dates */}
-          {/* <section className="rounded-2xl border border-border bg-surface p-6">
+          <section className="rounded-2xl border border-border bg-surface p-6">
             <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
               <Sparkles className="size-4 text-lime" /> Best dates to meet
             </h2>
-            {circle?.data?.tbl3cmtbl.length === 0 ? (
+            {availableDates.length === 0 ? (
               <p className="mt-4 text-sm text-muted-foreground">
                 Nothing yet — mark your free dates below and nudge the others.
               </p>
@@ -129,10 +140,10 @@ export default function CircleDetailClient(id: Props) {
               <ul className="mt-4 space-y-2.5">
                 {best.map((w) => {
                   const everyone =
-                    w.userIds.length === memberCount && memberCount > 0;
+                    w.user_id.length === memberCount && memberCount > 0;
                   return (
                     <li
-                      key={`${w.start}-${w.userIds.join()}`}
+                      key={`${w.start}-${w.user_id.join()}`}
                       className={cn(
                         "flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3.5",
                         everyone
@@ -151,7 +162,7 @@ export default function CircleDetailClient(id: Props) {
                         </p>
                         <p className="mt-0.5 text-xs text-muted-foreground">
                           {w.days} {w.days === 1 ? "day" : "days"} ·{" "}
-                          {w.userIds.map(nameFor).join(", ")}
+                          {w.user_id.map(nameFor).join(", ")}
                         </p>
                       </div>
                       <span
@@ -167,7 +178,7 @@ export default function CircleDetailClient(id: Props) {
                             <Check className="size-3" /> Everyone free
                           </span>
                         ) : (
-                          `${w.userIds.length} of ${memberCount} free`
+                          `${w.user_id.length} of ${memberCount} free`
                         )}
                       </span>
                       <button
@@ -184,7 +195,7 @@ export default function CircleDetailClient(id: Props) {
                 })}
               </ul>
             )}
-          </section> */}
+          </section>
 
           {/* Calendar + participants */}
           <div className="grid gap-6 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
@@ -206,19 +217,19 @@ export default function CircleDetailClient(id: Props) {
 
               <Calendar
                 mode="range"
-                // selected={range}
-                // onSelect={(r) => {
-                //   setRange(r);
-                //   if (r?.from) {
-                //     setPlanTarget({
-                //       start: dayKey(r.from),
-                //       end: dayKey(r.to ?? r.from),
-                //     });
-                //   }
-                // }}
+                selected={range}
+                onSelect={(r) => {
+                  setRange(r);
+                  if (r?.from) {
+                    setPlanTarget({
+                      start: dayKey(r.from),
+                      end: dayKey(r.to ?? r.from),
+                    });
+                  }
+                }}
                 numberOfMonths={1}
                 disabled={{ before: new Date() }}
-                // modifiers={{ mine: myDays, others: groupDays }}
+                modifiers={{ mine: myDays, others: groupDays }}
                 modifiersClassNames={{
                   mine: "[&>button]:ring-1 [&>button]:ring-lime/70 [&>button]:text-lime",
                   others: "[&>button]:bg-lime/10",
@@ -247,16 +258,16 @@ export default function CircleDetailClient(id: Props) {
                       </button>
                     </li>
                   ) : null}
-                  {/* {mine.map((a) => (
+                  {mine.map((a) => (
                     <li
-                      key={a.id}
+                      key={a.date_id}
                       className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs"
                     >
                       {formatWindow(a.start_date, a.end_date)}
                       <button
                         type="button"
                         aria-label="Remove dates"
-                        onClick={() => removeRange.mutate(a.id)}
+                        // onClick={() => removeRange.mutate(a.date_id)}
                         className="text-muted-foreground hover:text-destructive"
                       >
                         <X className="size-3" />
@@ -267,7 +278,7 @@ export default function CircleDetailClient(id: Props) {
                     <li className="text-xs text-muted-foreground">
                       Click one day for a single date, or two for a range.
                     </li>
-                  ) : null} */}
+                  ) : null}
                 </ul>
                 <Button
                   className="mt-3 w-full sm:w-auto"
@@ -280,33 +291,33 @@ export default function CircleDetailClient(id: Props) {
             </section>
 
             {/* Members + their dates */}
-            {/* <section className="min-w-0 space-y-3">
+            <section className="min-w-0 space-y-3">
               <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
                 Participants
               </h2>
-              {circle?.data?.tbl2cmtbl.map((m) => { 
-                const theirs = m..filter(
+              {(circle?.tbl2cmtbl).map((m) => {
+                const theirs = availableDates.filter(
                   (a) => a.user_id === m.user_id,
                 );
-                const profile = detail.data.profiles.find(
-                  (p) => p.id === m.user_id,
-                );
+                // const profile = circle?.data?.tbl2cmtbl.find(
+                //   (p) => p.user_id === m.user_id,
+                // );
                 return (
                   <div
-                    key={m.}
+                    key={m.member_id}
                     className="rounded-2xl border border-border bg-surface p-4"
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="size-8 border border-border">
-                        {profile?.avatar_url ? (
+                        {/* {profile?.avatar_url ? (
                           <AvatarImage src={profile.avatar_url} alt="" />
-                        ) : null}
+                        ) : null} */}
                         <AvatarFallback className="bg-surface-2 text-xs">
-                          {nameFor(m.user_id).slice(0, 2).toUpperCase()}
+                          {nameFor(m.member_id).slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <p className="font-medium">
-                        {nameFor(m.user_id)}
+                        {nameFor(m.member_id)}
                         {m.user_id === user?.id ? (
                           <span className="ml-2 text-xs text-muted-foreground">
                             you
@@ -322,15 +333,15 @@ export default function CircleDetailClient(id: Props) {
                       <ul className="mt-3 flex flex-wrap gap-2">
                         {theirs.map((a) => (
                           <li
-                            key={a.id}
+                            key={a.date_id}
                             className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs"
                           >
                             {formatWindow(a.start_date, a.end_date)}
-                            {a.user_id === user?.id ? (
+                            {a.user_id === currentUserId ? (
                               <button
                                 type="button"
                                 aria-label="Remove dates"
-                                onClick={() => removeRange.mutate(a.id)}
+                                // onClick={() => removeRange.mutate(a.id)}
                                 className="text-muted-foreground hover:text-destructive"
                               >
                                 <Trash2 className="size-3" />
@@ -344,25 +355,18 @@ export default function CircleDetailClient(id: Props) {
                 );
               })}
               {mine.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                Tip: add every window that works for you — overlaps are found
-                automatically.
-              </p>
+                <p className="text-xs text-muted-foreground">
+                  Tip: add every window that works for you — overlaps are found
+                  automatically.
+                </p>
               ) : null}
-            </section> */}
+            </section>
           </div>
         </div>
 
         {/* ── Right column: activity panel ── */}
         <div className="min-w-0 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1">
-          {/* <PlanPanel
-            circleId={circleId}
-            userId={user?.id}
-            plans={detail.data.plans}
-            target={planTarget}
-            onClearTarget={() => setPlanTarget(undefined)}
-            nameFor={nameFor}
-          /> */}
+          <PlanPanel circle_id={id} plans={itinerary} />
         </div>
       </div>
     </>

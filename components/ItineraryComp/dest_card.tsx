@@ -15,10 +15,8 @@ import { Button } from "@/components/button";
 import { cn } from "@/lib/utils";
 import { activityMeta } from "@/components/planner";
 import { formatWindow } from "@/lib/availability";
-import { useSession } from "@/hooks/useSession";
 
 export default function ItineraryClient({ initialData }: { initialData: any }) {
-  const { user } = useSession();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
 
@@ -29,7 +27,7 @@ export default function ItineraryClient({ initialData }: { initialData: any }) {
 
   const destinations = useMemo(
     () =>
-      [...(initialData?.plans ?? [])].sort((a: any, b: any) =>
+      [...(initialData?.name ?? [])].sort((a: any, b: any) =>
         a.start_date.localeCompare(b.start_date),
       ),
     [initialData],
@@ -60,8 +58,8 @@ export default function ItineraryClient({ initialData }: { initialData: any }) {
         ) : (
           <ul className="space-y-2.5">
             {destinations.map((d: any, i: number) => {
-              const meta = activityMeta(d.activity);
-              const Icon = meta.icon;
+              // const meta = activityMeta(d.activity);
+              // const Icon = meta.icon;
               const active = d.id === selectedId;
               return (
                 <li key={d.id}>
@@ -84,7 +82,7 @@ export default function ItineraryClient({ initialData }: { initialData: any }) {
                           : "bg-surface-2 text-muted-foreground ring-border",
                       )}
                     >
-                      <Icon className="size-4" />
+                      {/* <Icon className="size-4" /> */}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span
@@ -93,7 +91,8 @@ export default function ItineraryClient({ initialData }: { initialData: any }) {
                           active && "text-lime",
                         )}
                       >
-                        {i + 1}. {d.title || meta.label}
+                        {i + 1}. {d.name}
+                        {/* {i + 1}. {d.title || meta.label} */}
                       </span>
                       <span className="mt-0.5 block truncate text-xs text-muted-foreground">
                         {formatWindow(d.start_date, d.end_date)}
@@ -125,9 +124,9 @@ export default function ItineraryClient({ initialData }: { initialData: any }) {
                   <MapPinCheckInside className="size-5" />
                 </span>
                 <div>
-                  <h2 className="text-2xl font-bold">{selected.title}</h2>
+                  <h2 className="text-2xl font-bold">{selected.name}</h2>
                   <p className="text-xs text-muted-foreground">
-                    Added by {nameFor(selected.user_id)}
+                    {/* Added by {nameFor(selected.user_id)} */}
                   </p>
                 </div>
               </div>
@@ -164,12 +163,12 @@ export default function ItineraryClient({ initialData }: { initialData: any }) {
               />
             </div>
 
-            {selected.note ? (
+            {selected.notes ? (
               <div className="rounded-xl border border-border bg-background p-4">
                 <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
                   Notes
                 </p>
-                <p className="mt-1.5 text-sm">{selected.note}</p>
+                <p className="mt-1.5 text-sm">{selected.notes}</p>
               </div>
             ) : null}
 
